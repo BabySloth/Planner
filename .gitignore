@@ -1,0 +1,16 @@
+## Copied from https://github.com/SleepyTrousers/EnderIO
+
+## gradle
+**/.gradle
+**/build
+
+## intellij
+/out
+/.idea
+/*.iml
+/classes
+/*.ipr
+/*.iws
+
+## OSX
+.DS_Store
