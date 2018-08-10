@@ -1,7 +1,7 @@
 import javafx.scene.layout.StackPane;
 import view.VIEWS;
 import view.calendar.CalendarView;
-import view.dashboard.DashBoard;
+import view.changing.DashBoard;
 
 class MainHolder extends StackPane {
     private final String STYLESHEET = getClass().getResource("MainHolderDesign.css").toExternalForm();

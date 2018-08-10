@@ -1,3 +1,4 @@
+import helper.Measurement;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -9,7 +10,7 @@ public class Main extends Application {
         // Generate the root
         StackPane root = new MainHolder();
 
-        Scene scene = new Scene(root, 300, 300);
+        Scene scene = new Scene(root, Measurement.screen_wdith, Measurement.screen_height);
         stage.setScene(scene);
         stage.show();
     }

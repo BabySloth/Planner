@@ -1,5 +1,6 @@
-package view.dashboard;
+package view.changing;
 
+import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import view.BasicView;
@@ -12,11 +13,22 @@ public class DashBoard extends VBox implements BasicView {
     public DashBoard(){
         parent = (StackPane) getParent();
         previousView = null;  // First time launching app doesn't have a previous
+        generateView();
     }
 
     @Override
     public void generateView() {
-        
+        // Previous goes on top
+
+        getChildren().addAll();
+    }
+
+    private void generatePreviousContainer(){
+
+    }
+
+    private void generateContainer(){
+
     }
 
     public void setPreviousView(VIEWS previousView) {

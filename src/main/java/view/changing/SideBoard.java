@@ -1,4 +1,5 @@
-package view.dashboard;
+package view.changing;
 
 public class SideBoard {
+
 }
