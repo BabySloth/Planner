@@ -1,12 +1,13 @@
 import javafx.scene.layout.StackPane;
+import view.BasicView;
 import view.VIEWS;
 import view.calendar.CalendarView;
 import view.changing.DashBoard;
 
-class MainHolder extends StackPane {
+class MainHolder extends StackPane implements BasicView {
     private final String STYLESHEET = getClass().getResource("MainHolderDesign.css").toExternalForm();
-    private final DashBoard dashBoard = new DashBoard();
-    private final CalendarView calendarView = new CalendarView();
+    private DashBoard dashBoard;
+    private CalendarView calendarView;
     private VIEWS currentView;
 
     /**
@@ -15,9 +16,19 @@ class MainHolder extends StackPane {
     MainHolder(){
         getStylesheets().add(STYLESHEET);
 
+        createViews();
+    }
+
+    @Override
+    public void generateView() {
         // First view is always the dashboard
         currentView = VIEWS.DASHBOARD;
         getChildren().add(dashBoard);
+    }
+
+    private void createViews(){
+        dashBoard = new DashBoard(this);
+        calendarView = new CalendarView();
     }
 
     /**

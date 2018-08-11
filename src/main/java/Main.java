@@ -10,8 +10,10 @@ public class Main extends Application {
         // Generate the root
         StackPane root = new MainHolder();
 
-        Scene scene = new Scene(root, Measurement.screen_wdith, Measurement.screen_height);
+        Scene scene = new Scene(root, Measurement.SCREEN_WIDTH, Measurement.SCREEN_HEIGHT);
         stage.setScene(scene);
+        stage.setFullScreen(true);
+        stage.setFullScreenExitHint("");
         stage.show();
     }
 
