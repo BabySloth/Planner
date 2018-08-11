@@ -1,3 +1,4 @@
+import helper.Measurement;
 import javafx.scene.layout.StackPane;
 import view.BasicView;
 import view.VIEWS;
@@ -15,8 +16,9 @@ class MainHolder extends StackPane implements BasicView {
      */
     MainHolder(){
         getStylesheets().add(STYLESHEET);
-
+        setPrefSize(Measurement.SCREEN_WIDTH, Measurement.SCREEN_HEIGHT);
         createViews();
+        generateView();
     }
 
     @Override

@@ -19,12 +19,16 @@ public class DashBoard extends VBox implements BasicView {
         this.parent = parent;
         previousView = null;  // First time launching app doesn't have a previous
         generateView();
+
     }
 
     @Override
     public void generateView() {
         // Center
         parent.setAlignment(Pos.CENTER);
+
+        // Size
+        setMaxSize(Measurement.DashBoard.WIDTH, Measurement.DashBoard.HEIGHT);
 
         // CSS
         getStylesheets().addAll(Fonts.Stylesheet.ROBOTO,
@@ -35,7 +39,6 @@ public class DashBoard extends VBox implements BasicView {
             getChildren().add(generatePreviousContainer());
 
         getChildren().addAll();
-
     }
 
     private StackPane generatePreviousContainer(){
@@ -43,8 +46,10 @@ public class DashBoard extends VBox implements BasicView {
         holder.setPrefSize(Measurement.DashBoard.PREVIOUS_WIDTH, Measurement.DashBoard.PREVIOUS_HEIGHT);
 
         //Label label = new Label(String.format("Previous: %s", previousView.toString()));
-        Label label = new Label("ASD");  //TODO replace
-        label.setStyle(Fonts.Style.getRoboto(20));
+        Label label = new Label("Previous: ");  //TODO replace
+        label.setMinSize(Measurement.DashBoard.PREVIOUS_WIDTH, Measurement.DashBoard.PREVIOUS_HEIGHT);
+        label.setMaxSize(Measurement.DashBoard.PREVIOUS_WIDTH, Measurement.DashBoard.PREVIOUS_HEIGHT);
+        label.setStyle(Fonts.Style.getRoboto(40) + "-fx-background-color: pink;");
         holder.getChildren().add(label);
 
         return holder;
