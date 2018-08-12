@@ -14,15 +14,16 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import view.BasicView;
+import view.MainHolder;
 import view.VIEWS;
 
 import java.time.LocalDate;
 
 public class DashBoard extends VBox implements BasicView {
-    private final StackPane parent;
+    private final MainHolder parent;
     private VIEWS previousView;
 
-    public DashBoard(StackPane parent){
+    public DashBoard(MainHolder parent){
         this.parent = parent;
         previousView = null;  // First time launching app doesn't have a previous
         generateView();
@@ -83,6 +84,7 @@ public class DashBoard extends VBox implements BasicView {
         Label date = horizontalRegularLabel(dateText, 40);
 
         container.getChildren().addAll(name, date);
+        container.setOnMouseClicked(e -> parent.changeView(VIEWS.CALENDAR));
         return container;
     }
 

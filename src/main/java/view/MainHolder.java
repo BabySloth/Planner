@@ -1,3 +1,5 @@
+package view;
+
 import helper.Measurement;
 import javafx.scene.layout.StackPane;
 import view.BasicView;
@@ -5,7 +7,7 @@ import view.VIEWS;
 import view.calendar.CalendarView;
 import view.changing.DashBoard;
 
-class MainHolder extends StackPane implements BasicView {
+public class MainHolder extends StackPane implements BasicView {
     private final String STYLESHEET = getClass().getResource("MainHolderDesign.css").toExternalForm();
     private DashBoard dashBoard;
     private CalendarView calendarView;
@@ -14,7 +16,7 @@ class MainHolder extends StackPane implements BasicView {
     /**
      * First view is always the views.dashboard
      */
-    MainHolder(){
+    public MainHolder(){
         getStylesheets().add(STYLESHEET);
         setPrefSize(Measurement.SCREEN_WIDTH, Measurement.SCREEN_HEIGHT);
         createViews();
@@ -37,7 +39,7 @@ class MainHolder extends StackPane implements BasicView {
      * Show a new view
      * @param newView New view to be shown
      */
-    protected void changeView(VIEWS newView){
+    public void changeView(VIEWS newView){
         // Remove the current view if the new view is a different one
         if(newView == currentView){
             return;
