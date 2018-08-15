@@ -1,6 +1,23 @@
-.ScrollPane{
-    -fx-background-color: transparent;
+@import url("https://fonts.googleapis.com/css?family=Roboto");
+
+.container{
+    -fx-border-radius: 5px 5px 5px 5px;
+    -fx-background-radius: 5px 5px 5px 5px;
+    -fx-background-color: rgba(30, 30, 30, .5);
 }
-.ScrollPane > .viewport{
-    -fx-background-color: transparent;
+
+.robotoMedium{
+    -fx-font-family: 'Roboto', sans-serif;
+    -fx-font-size: 40px;
+    -fx-font-weight: 300;
+}
+
+.robotoThin{
+    -fx-font-family: 'Roboto', sans-serif;
+    -fx-font-size: 40px;
+    -fx-font-weight: 100;
+}
+
+.preventBorderTouch{
+    -fx-padding: 0px 0px 0px 5px;
 }

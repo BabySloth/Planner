@@ -14,4 +14,9 @@ public class CalendarView extends HBox implements BasicView {
     public void generateView() {
 
     }
+
+    @Override
+    public void setMainDesign() {
+
+    }
 }

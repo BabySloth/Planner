@@ -8,7 +8,7 @@ import view.calendar.CalendarView;
 import view.changing.DashBoard;
 
 public class MainHolder extends StackPane implements BasicView {
-    private final String STYLESHEET = getClass().getResource("MainHolderDesign.css").toExternalForm();
+    private final String STYLESHEET = getClass().getClassLoader().getResource("MainHolderDesign.css").toExternalForm();
     private DashBoard dashBoard;
     private CalendarView calendarView;
     private VIEWS currentView;
@@ -17,9 +17,8 @@ public class MainHolder extends StackPane implements BasicView {
      * First view is always the views.dashboard
      */
     public MainHolder(){
-        getStylesheets().add(STYLESHEET);
-        setPrefSize(Measurement.SCREEN_WIDTH, Measurement.SCREEN_HEIGHT);
         createViews();
+        setMainDesign();
         generateView();
     }
 
@@ -33,6 +32,13 @@ public class MainHolder extends StackPane implements BasicView {
     private void createViews(){
         dashBoard = new DashBoard(this);
         calendarView = new CalendarView();
+    }
+
+    @Override
+    public void setMainDesign() {
+        getStylesheets().add(STYLESHEET);
+        setPrefSize(Measurement.SCREEN_WIDTH, Measurement.SCREEN_HEIGHT);
+        getStyleClass().add("mainHolder");
     }
 
     /**
@@ -51,10 +57,13 @@ public class MainHolder extends StackPane implements BasicView {
         switch(newView){
             case CALENDAR:
                 getChildren().add(calendarView);
+                System.out.println("changed view");
                 break;
             case DASHBOARD:
                 getChildren().add(dashBoard);
                 break;
         }
+
+        currentView = newView;
     }
 }

@@ -1,3 +1,3 @@
-.button{
-    -fx-background-color: red;
+.mainHolder{
+    -fx-background-color: #454545; /*See Colors.DARK_GRAY*/
 }
