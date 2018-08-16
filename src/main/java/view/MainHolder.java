@@ -26,7 +26,7 @@ public class MainHolder extends Pane implements BasicView {
     public void generateView() {
         // First view is always the dashboard
         currentView = VIEWS.DASHBOARD;
-        getChildren().addAll(DashBoard.getInstance(), new SideBoard(VIEWS.CALENDAR));
+        getChildren().addAll(DashBoard.getInstance(), new SideBoard(VIEWS.DASHBOARD));
     }
 
     @Override

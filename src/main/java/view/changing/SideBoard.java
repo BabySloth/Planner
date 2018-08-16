@@ -29,6 +29,8 @@ public class SideBoard extends HBox implements BasicView {
 
         generateView();
         setMainDesign();
+
+        toFront();
     }
 
     @Override
@@ -37,6 +39,7 @@ public class SideBoard extends HBox implements BasicView {
         if(!calledOnce){
             getStylesheets().add(getClass().getClassLoader().getResource("sideboard.css").toExternalForm());
             setPrefHeight(helper.Measurement.SCREEN_HEIGHT);
+            getStyleClass().add("mainContainer");
         }
 
         double width = expanderType == ExpanderType.EXTENDED ? Measurement.EXPAND_WIDTH : Measurement.HIDDEN_WIDTH;
@@ -136,9 +139,9 @@ public class SideBoard extends HBox implements BasicView {
         EXTENDED, HIDDEN;
     }
 
-    private class Measurement{
-        final static double EXPAND_WIDTH = 0;
-        final static double HIDDEN_WIDTH = 15;
+    private static class Measurement{
+        final static double EXPAND_WIDTH = 315;
+        final static double HIDDEN_WIDTH = helper.Measurement.STARTING_XCOR;
         final static double CONTENT_WIDTH = 300;
         final static double CONTENT_BREAK = 150;
     }

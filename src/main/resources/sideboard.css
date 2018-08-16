@@ -25,3 +25,7 @@
 .changeViewLabel:hover{
     -fx-background-color: #292929;
 }
+
+.mainContainer{
+    -fx-background-color: #454545;
+}

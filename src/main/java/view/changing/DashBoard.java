@@ -33,8 +33,8 @@ public class DashBoard extends Pane implements BasicView {
 
     @Override
     public void setMainDesign() {
-        double width = Measurement.DashBoard.WIDTH;
-        double height =  Measurement.DashBoard.HEIGHT;
+        double width = Measurement.WIDTH;
+        double height =  Measurement.HEIGHT;
 
         // Stylesheet
         getStylesheets().add(getClass().getClassLoader().getResource("dashboard.css").toExternalForm());
@@ -42,8 +42,8 @@ public class DashBoard extends Pane implements BasicView {
         getStyleClass().add("debug");
 
         // Position
-        double middleX = Measurement.SCREEN_WIDTH / 2;
-        double middleY = Measurement.SCREEN_HEIGHT / 2;
+        double middleX = helper.Measurement.SCREEN_WIDTH / 2;
+        double middleY = helper.Measurement.SCREEN_HEIGHT / 2;
         relocate(middleX  - width / 2, middleY - height / 2);
     }
 
@@ -72,7 +72,7 @@ public class DashBoard extends Pane implements BasicView {
         Label sideLabel = generateLabel(sideText, sideColor, "robotoThin");
 
         HBox container = (HBox) generateContainer(new HBox(mainLabel, sideLabel),
-                                                  Measurement.DashBoard.WIDTH, 50, 0, 0);
+                                                  Measurement.WIDTH, 50, 0, 0);
 
         container.setOnMouseClicked(e -> {
             MainHolder parent = MainHolder.getInstance();
@@ -191,5 +191,11 @@ public class DashBoard extends Pane implements BasicView {
 
     public void setContainsWarning(boolean containsWarning){
         this.containsWarning = containsWarning;
+    }
+
+    private static class Measurement{
+        final static double WIDTH = 700;
+        final static double HEIGHT = 215;
+        final static double PREVIOUS_HEIGHT = 50;
     }
 }

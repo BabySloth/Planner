@@ -31,8 +31,13 @@ public class CalendarView extends HBox implements BasicView {
 
     @Override
     public void setMainDesign() {
-        relocate(0, 0);
-        setPrefSize(Measurement.SCREEN_WIDTH, Measurement.SCREEN_HEIGHT);
+        final double starting_xcor =  helper.Measurement.STARTING_XCOR;
+        relocate(starting_xcor, 0);
+        setPrefSize(helper.Measurement.SCREEN_WIDTH - starting_xcor, helper.Measurement.SCREEN_HEIGHT);
         setStyle("-fx-background-color: yellow;");
+    }
+
+    private class Measurement{
+
     }
 }
