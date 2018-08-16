@@ -1,5 +1,6 @@
 package view.calendar;
 
+import helper.Measurement;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import view.BasicView;
@@ -12,7 +13,8 @@ public class CalendarView extends HBox implements BasicView {
     private static CalendarView self = null;
 
     private CalendarView(){
-
+        setMainDesign();
+        generateView();
     }
 
     public static CalendarView getInstance(){
@@ -29,6 +31,8 @@ public class CalendarView extends HBox implements BasicView {
 
     @Override
     public void setMainDesign() {
-
+        relocate(0, 0);
+        setPrefSize(Measurement.SCREEN_WIDTH, Measurement.SCREEN_HEIGHT);
+        setStyle("-fx-background-color: yellow;");
     }
 }

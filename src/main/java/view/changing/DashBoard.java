@@ -111,7 +111,12 @@ public class DashBoard extends Pane implements BasicView {
         Label sideLabel = generateLabel(sideText, Colors.LIGHT_GRAY,
                                         "robotoThin", "preventBorderTouch");
 
-        return (VBox) generateContainer(new VBox(mainLabel, sideLabel), 300, 105, 0, 55);
+        VBox container = (VBox) generateContainer(new VBox(mainLabel, sideLabel), 300, 105, 0, 55);
+        container.setOnMouseClicked(e -> {
+            MainHolder.getInstance().changeView(view);
+        });
+
+        return container;
     }
 
     /**

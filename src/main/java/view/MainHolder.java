@@ -7,6 +7,7 @@ import view.BasicView;
 import view.VIEWS;
 import view.calendar.CalendarView;
 import view.changing.DashBoard;
+import view.changing.SideBoard;
 
 public class MainHolder extends Pane implements BasicView {
     private static MainHolder self = null;
@@ -25,7 +26,7 @@ public class MainHolder extends Pane implements BasicView {
     public void generateView() {
         // First view is always the dashboard
         currentView = VIEWS.DASHBOARD;
-        getChildren().add(DashBoard.getInstance());
+        getChildren().addAll(DashBoard.getInstance(), new SideBoard(VIEWS.CALENDAR));
     }
 
     @Override
@@ -44,6 +45,8 @@ public class MainHolder extends Pane implements BasicView {
         if(newView == currentView){
             return;
         }else{
+            DashBoard.getInstance().setPreviousView(currentView);
+            currentView = newView;
             getChildren().clear();
         }
 
@@ -51,14 +54,11 @@ public class MainHolder extends Pane implements BasicView {
         switch(newView){
             case CALENDAR:
                 getChildren().add(CalendarView.getInstance());
-                System.out.println("changed view");
                 break;
             case DASHBOARD:
                 getChildren().add(DashBoard.getInstance());
                 break;
         }
-
-        currentView = newView;
     }
 
     public static MainHolder getInstance() {
