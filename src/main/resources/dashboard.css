@@ -3,7 +3,11 @@
 .container{
     -fx-border-radius: 5px 5px 5px 5px;
     -fx-background-radius: 5px 5px 5px 5px;
-    -fx-background-color: rgba(30, 30, 30, .5);
+    -fx-background-color: #3e3e3e;
+}
+
+.container:hover{
+    -fx-background-color: #292929;
 }
 
 .robotoMedium{

@@ -1,0 +1,27 @@
+@import url("https://fonts.googleapis.com/css?family=Roboto");
+
+.expanderLabel{
+    -fx-font-family: 'Roboto', sans-serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: 100;
+    -fx-background-color: #212121;
+}
+
+.mainContent{
+    -fx-background-color: transparent;
+}
+
+.mainContent > .viewport{
+    -fx-background-color: transparent;
+}
+
+.changeViewLabel{
+    -fx-font-family: 'Roboto', sans-serif;
+    -fx-font-size: 25px;
+    -fx-font-weight: 300;
+    -fx-padding: 10px 0px 10px 5px;
+}
+
+.changeViewLabel:hover{
+    -fx-background-color: #292929;
+}

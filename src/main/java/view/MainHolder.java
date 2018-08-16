@@ -48,15 +48,16 @@ public class MainHolder extends Pane implements BasicView {
             DashBoard.getInstance().setPreviousView(currentView);
             currentView = newView;
             getChildren().clear();
+            getChildren().add(new SideBoard(newView));  // Sideboard is always shown
         }
 
         // Add the new view to the screen
         switch(newView){
-            case CALENDAR:
-                getChildren().add(CalendarView.getInstance());
-                break;
             case DASHBOARD:
                 getChildren().add(DashBoard.getInstance());
+                break;
+            case CALENDAR:
+                getChildren().add(CalendarView.getInstance());
                 break;
         }
     }

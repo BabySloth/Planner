@@ -12,6 +12,11 @@ public class Measurement{
         public static double REGULAR_HEIGHT = HEIGHT - PREVIOUS_HEIGHT;
     }
 
+    public static class SideBoard{
+        public static double EXPAND_WIDTH = 0;
+        public static double HIDDEN_WIDTH = 10;
+    }
+
     public static class Warning{
         public static double HEIGHT = 25;
     }
