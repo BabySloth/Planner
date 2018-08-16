@@ -1,0 +1,10 @@
+.container{
+    -fx-background-color: #FF3E41;
+}
+
+.label{
+    -fx-font-family: 'Roboto', sans-serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: 100;
+    -fx-padding: 0px 0px 0px 5px;
+}

@@ -1,23 +1,22 @@
 package view;
 
 import helper.Measurement;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import view.BasicView;
 import view.VIEWS;
 import view.calendar.CalendarView;
 import view.changing.DashBoard;
 
-public class MainHolder extends StackPane implements BasicView {
+public class MainHolder extends Pane implements BasicView {
+    private static MainHolder self = null;
     private final String STYLESHEET = getClass().getClassLoader().getResource("MainHolderDesign.css").toExternalForm();
-    private DashBoard dashBoard;
-    private CalendarView calendarView;
     private VIEWS currentView;
 
     /**
      * First view is always the views.dashboard
      */
-    public MainHolder(){
-        createViews();
+    private MainHolder(){
         setMainDesign();
         generateView();
     }
@@ -26,12 +25,7 @@ public class MainHolder extends StackPane implements BasicView {
     public void generateView() {
         // First view is always the dashboard
         currentView = VIEWS.DASHBOARD;
-        getChildren().add(dashBoard);
-    }
-
-    private void createViews(){
-        dashBoard = new DashBoard(this);
-        calendarView = new CalendarView();
+        getChildren().add(DashBoard.getInstance());
     }
 
     @Override
@@ -56,14 +50,21 @@ public class MainHolder extends StackPane implements BasicView {
         // Add the new view to the screen
         switch(newView){
             case CALENDAR:
-                getChildren().add(calendarView);
+                getChildren().add(CalendarView.getInstance());
                 System.out.println("changed view");
                 break;
             case DASHBOARD:
-                getChildren().add(dashBoard);
+                getChildren().add(DashBoard.getInstance());
                 break;
         }
 
         currentView = newView;
+    }
+
+    public static MainHolder getInstance() {
+        if(self == null){
+            self = new MainHolder();
+        }
+        return self;
     }
 }
