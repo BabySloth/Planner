@@ -1,7 +1,6 @@
 package view.changing;
 
 import helper.Colors;
-import helper.Measurement;
 import helper.Warning;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
@@ -13,22 +12,15 @@ import view.VIEWS;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class DashBoard extends Pane implements BasicView {
-    private static DashBoard self = null;
+public class DashBoard extends Pane implements BasicView{
+    private MainHolder parent;
     private VIEWS previousView = null;
-    private boolean containsWarning = false;
     private Warning warning;
 
-    private DashBoard(){
+    public DashBoard(MainHolder parent){
+        this.parent = parent;
         setMainDesign();
         generateView();
-    }
-
-    public static DashBoard getInstance(){
-        if(self == null){
-            self = new DashBoard();
-        }
-        return self;
     }
 
     @Override
@@ -53,6 +45,8 @@ public class DashBoard extends Pane implements BasicView {
     }
 
     /**
+     * Click to bring back the most recent used view. If none, gives user a warning.
+     *
      * Height: 50
      * Width: MAX
      * Location: 0, 0
@@ -75,18 +69,13 @@ public class DashBoard extends Pane implements BasicView {
                                                   Measurement.WIDTH, 50, 0, 0);
 
         container.setOnMouseClicked(e -> {
-            MainHolder parent = MainHolder.getInstance();
-
             if (hasPrevious) {
                 parent.changeView(previousView);
             } else {
                 double x = e.getX() + getLayoutX();
                 double y = e.getY() + getLayoutY();
-                if(containsWarning)
-                    parent.getChildren().remove(warning);
                 warning = new Warning("No previous view has been selected", 350, x, y);
                 parent.getChildren().add(warning);
-                containsWarning = true;
             }
         });
 
@@ -112,9 +101,7 @@ public class DashBoard extends Pane implements BasicView {
                                         "robotoThin", "preventBorderTouch");
 
         VBox container = (VBox) generateContainer(new VBox(mainLabel, sideLabel), 300, 105, 0, 55);
-        container.setOnMouseClicked(e -> {
-            MainHolder.getInstance().changeView(view);
-        });
+        container.setOnMouseClicked(e -> parent.changeView(view));
 
         return container;
     }
@@ -169,6 +156,15 @@ public class DashBoard extends Pane implements BasicView {
         return generateContainer(new Pane(mainLabel), 450, 50, 0, 165);
     }
 
+    /**
+     * Container for label of what clicking the container does.
+     * @param pane What container is being used. Should be used with (new VBox(), ...)
+     * @param width Width of container.
+     * @param height Height of container.
+     * @param x Position x
+     * @param y Position y
+     * @return Newly designed container, doesn't create a new object but modifies
+     */
     private Pane generateContainer(Pane pane, double width, double height, double x, double y) {
         pane.setPrefSize(width, height);
         pane.relocate(x, y);
@@ -177,6 +173,13 @@ public class DashBoard extends Pane implements BasicView {
         return pane;
     }
 
+    /**
+     * Creates a label for container
+     * @param text Text for container
+     * @param color Text color
+     * @param cssClasses Any css style classes
+     * @return New object for label
+     */
     private Label generateLabel(String text, Color color, String... cssClasses) {
         Label label = new Label(text);
         label.getStyleClass().addAll(cssClasses);
@@ -185,17 +188,19 @@ public class DashBoard extends Pane implements BasicView {
         return label;
     }
 
+    /**
+     * Changes the previous container ({@link #previousView()} to allow quick go back.
+     * @param view Most recently used view (other than dashboard)
+     */
     public void setPreviousView(VIEWS view) {
         previousView = view;
-    }
-
-    public void setContainsWarning(boolean containsWarning){
-        this.containsWarning = containsWarning;
+        // Update the previous view container
+        getChildren().clear();
+        generateView();
     }
 
     private static class Measurement{
         final static double WIDTH = 700;
         final static double HEIGHT = 215;
-        final static double PREVIOUS_HEIGHT = 50;
     }
 }

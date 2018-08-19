@@ -4,7 +4,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import view.BasicView;
 import view.MainHolder;
-import view.changing.DashBoard;
 
 public class Warning extends Pane implements BasicView {
     private String text;
@@ -44,9 +43,6 @@ public class Warning extends Pane implements BasicView {
     }
 
     private void removeSelf() {
-        setOnMouseClicked(e -> {
-            MainHolder.getInstance().getChildren().remove(this);
-            DashBoard.getInstance().setContainsWarning(false);
-        });
+        setOnMouseClicked(e -> MainHolder.getInstance().getChildren().remove(this));
     }
 }

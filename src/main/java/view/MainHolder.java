@@ -12,12 +12,15 @@ import view.changing.SideBoard;
 public class MainHolder extends Pane implements BasicView {
     private static MainHolder self = null;
     private final String STYLESHEET = getClass().getClassLoader().getResource("MainHolderDesign.css").toExternalForm();
+    private DashBoard dashBoard;
+    private CalendarView calendarView;
     private VIEWS currentView;
 
     /**
      * First view is always the views.dashboard
      */
     private MainHolder(){
+        prepareView();
         setMainDesign();
         generateView();
     }
@@ -26,7 +29,7 @@ public class MainHolder extends Pane implements BasicView {
     public void generateView() {
         // First view is always the dashboard
         currentView = VIEWS.DASHBOARD;
-        getChildren().addAll(DashBoard.getInstance(), new SideBoard(VIEWS.DASHBOARD));
+        getChildren().addAll(dashBoard, new SideBoard(VIEWS.DASHBOARD));
     }
 
     @Override
@@ -34,6 +37,11 @@ public class MainHolder extends Pane implements BasicView {
         getStylesheets().add(STYLESHEET);
         setPrefSize(Measurement.SCREEN_WIDTH, Measurement.SCREEN_HEIGHT);
         getStyleClass().add("mainHolder");
+    }
+
+    private void prepareView(){
+        dashBoard = new DashBoard(this);
+        calendarView = new CalendarView(this);
     }
 
     /**
@@ -45,7 +53,7 @@ public class MainHolder extends Pane implements BasicView {
         if(newView == currentView){
             return;
         }else{
-            DashBoard.getInstance().setPreviousView(currentView);
+            dashBoard.setPreviousView(currentView);
             currentView = newView;
             getChildren().clear();
             getChildren().add(new SideBoard(newView));  // Sideboard is always shown
@@ -54,10 +62,10 @@ public class MainHolder extends Pane implements BasicView {
         // Add the new view to the screen
         switch(newView){
             case DASHBOARD:
-                getChildren().add(DashBoard.getInstance());
+                getChildren().add(dashBoard);
                 break;
             case CALENDAR:
-                getChildren().add(CalendarView.getInstance());
+                getChildren().add(calendarView);
                 break;
         }
     }

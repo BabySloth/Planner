@@ -9,10 +9,6 @@ import view.changing.DashBoard;
 public class Main extends Application {
     @Override
     public void start(Stage stage){
-        // Init singletons
-        DashBoard.getInstance();
-        CalendarView.getInstance();
-
         Scene scene = new Scene(MainHolder.getInstance(), Measurement.SCREEN_WIDTH, Measurement.SCREEN_HEIGHT);
         stage.setScene(scene);
         stage.setFullScreen(true);
