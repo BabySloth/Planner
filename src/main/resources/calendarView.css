@@ -1,0 +1,14 @@
+.scrollPane{
+    -fx-background-color: transparent;
+}
+.scrollPane > .viewport{
+    -fx-background-color: transparent;
+}
+
+.buttonCalendar{
+    -fx-background-color: #3e3e3e;
+}
+
+.buttonCalendar:hover{
+    -fx-background-color: #292929;
+}

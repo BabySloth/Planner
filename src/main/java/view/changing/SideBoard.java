@@ -116,12 +116,17 @@ public class SideBoard extends HBox implements BasicView {
             label.getStyleClass().add("changeViewLabel");
             label.setTextFill(view.color);
             label.setPrefWidth(SideBoard.Measurement.CONTENT_WIDTH);
-            if(view == activeView)
+            if(view == activeView) {
                 label.setBackground(new Background(new BackgroundFill(Colors.DARKEST_GRAY, null, null)));
-            else
+                // Hides the view if user clicks on the already showing view
+                label.setOnMouseClicked(e -> {
+                    expanderType = ExpanderType.HIDDEN;
+                    updateView();
+                });
+            } else {
                 label.setBackground(new Background(new BackgroundFill(Colors.DARK_GRAY, null, null)));
-
-            label.setOnMouseClicked(e -> MainHolder.getInstance().changeView(view));
+                label.setOnMouseClicked(e -> MainHolder.getInstance().changeView(view));
+            }
             return label;
         }
 
