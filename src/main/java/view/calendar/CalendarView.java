@@ -1,6 +1,8 @@
 package view.calendar;
 
 import helper.Colors;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -24,13 +26,14 @@ public class CalendarView extends HBox implements BasicView{
     private LocalDate firstCalendarDate;
     private final MainHolder parent;
     private boolean containsWarning = false;
-    private AllEvents allEvents = new AllEvents();
+    private AllEvents allEvents;
 
     // Children content
     ScrollPane scrollPane = new ScrollPane();
 
-    public CalendarView(MainHolder parent){
+    public CalendarView(MainHolder parent, AllEvents allEvents){
         this.parent = parent;
+        this.allEvents = allEvents;
         setMainDesign();
         generateView();
     }
@@ -280,14 +283,17 @@ public class CalendarView extends HBox implements BasicView{
             private final int position;
             private final LocalDate date;
             private final ArrayList<Event> events;
-            private final HashMap<String, Integer> orders = new HashMap<>();
+            private final HashMap<Event, Integer> orders = new HashMap<>();
 
             CalendarBox(int position, LocalDate date, ArrayList<Event> events){
                 this.position = position;
                 this.date = date;
                 this.events = events;
+                this.setAlignment(Pos.TOP_RIGHT);
                 setMainDesign();
                 generateView();
+
+                setOnMouseClicked(e -> System.out.println(events.size()));
             }
 
             @Override
@@ -301,11 +307,22 @@ public class CalendarView extends HBox implements BasicView{
                 getChildren().add(generateDateDisplay());
 
                 // Events populate
-                /*int order = 0;
+                int order = 0;
                 for(Event event : events){
-                    getChildren().addAll(generateBlank(1, 2), new EventDisplay());
+                    // EventDisplay information
+                    boolean isSunday = date.getDayOfWeek() == DayOfWeek.SUNDAY;
+                    boolean needsTitle = isSunday || event.getDaysLength() == 1;
+                    boolean isContinuation = !needsTitle || (isSunday && event.occurs(date.minusDays(1)));
+
+                    getChildren().addAll(generateBlank(1, 2), new EventDisplay(event, event.spanDays(),
+                                                                               isContinuation, needsTitle));
+
+                    // First view has the highest of all calendarBoxes priority of positioning
+                    if(position == 0){
+
+                    }
                     order++;
-                }*/
+                }
             }
 
             private Label generateDateDisplay(){
@@ -338,7 +355,43 @@ public class CalendarView extends HBox implements BasicView{
     }
 
     private class EventDisplay extends StackPane{
+        final private Event event;
+        private double spanAmount;
+        private boolean isContinuation;
+        private boolean needsTitle;
+        private double width = 130;
+        final private double height = 20;
 
+        EventDisplay(Event event, int spanAmount, boolean isContinuation, boolean needsTitle) {
+            this.event = event;
+            this.spanAmount = spanAmount * width - 10;
+            this.isContinuation = isContinuation;
+            this.needsTitle = needsTitle;
+
+            // Sizing
+            width = isContinuation ? 130 : 120;
+            setMinSize(width, height);
+            setPrefSize(width, height);
+            setMaxSize(width, height);
+
+            generateBackground();
+            generateText(); // Depends on position
+        }
+
+        private void generateBackground(){
+            Rectangle rectangle = new Rectangle(width, height, event.getColor());
+            this.getChildren().add(rectangle);
+        }
+
+        private void generateText(){
+            Label label = new Label(event.getTitle());
+            label.setMinSize(width, height);
+            label.setPrefSize(width, height);
+            label.setMaxSize(width, height);
+            label.setTextFill(Colors.DARK_GRAY);
+            label.setAlignment(Pos.CENTER);
+            this.getChildren().add(label);
+        }
     }
 
     /**

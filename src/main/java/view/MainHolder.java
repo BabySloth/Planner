@@ -2,12 +2,14 @@ package view;
 
 import helper.Measurement;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import view.BasicView;
-import view.VIEWS;
+import javafx.stage.Stage;
+import view.calendar.AllEvents;
 import view.calendar.CalendarView;
+import view.calendar.DiskData;
 import view.changing.DashBoard;
 import view.changing.SideBoard;
+
+import java.util.Arrays;
 
 public class MainHolder extends Pane implements BasicView {
     private static MainHolder self = null;
@@ -15,14 +17,43 @@ public class MainHolder extends Pane implements BasicView {
     private DashBoard dashBoard;
     private CalendarView calendarView;
     private VIEWS currentView;
+    private DiskData diskData = new DiskData();
+
+    //Data
+    AllEvents calendarData = new AllEvents();
+
+    /**
+     * Singleton
+     * @return Same instance
+     */
+    public static MainHolder getInstance() {
+        if(self == null){
+            self = new MainHolder();
+        }
+        return self;
+    }
 
     /**
      * First view is always the views.dashboard
      */
     private MainHolder(){
+        readData();
         prepareView();
         setMainDesign();
         generateView();
+    }
+
+    private void prepareView(){
+        dashBoard = new DashBoard(this);
+        calendarView = new CalendarView(this, calendarData);
+    }
+
+    private void readData(){
+        diskData.calendarRead(calendarData);
+    }
+
+    public void writeData(){
+
     }
 
     @Override
@@ -37,11 +68,6 @@ public class MainHolder extends Pane implements BasicView {
         getStylesheets().add(STYLESHEET);
         setPrefSize(Measurement.SCREEN_WIDTH, Measurement.SCREEN_HEIGHT);
         getStyleClass().add("mainHolder");
-    }
-
-    private void prepareView(){
-        dashBoard = new DashBoard(this);
-        calendarView = new CalendarView(this);
     }
 
     /**
@@ -68,12 +94,5 @@ public class MainHolder extends Pane implements BasicView {
                 getChildren().add(calendarView);
                 break;
         }
-    }
-
-    public static MainHolder getInstance() {
-        if(self == null){
-            self = new MainHolder();
-        }
-        return self;
     }
 }

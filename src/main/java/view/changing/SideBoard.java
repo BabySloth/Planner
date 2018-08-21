@@ -2,14 +2,20 @@ package view.changing;
 
 import helper.Colors;
 import helper.Measurement;
+import javafx.event.EventHandler;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 import view.BasicView;
 import view.MainHolder;
 import view.VIEWS;
+
 
 public class SideBoard extends HBox implements BasicView {
     private final VIEWS activeView;
@@ -98,7 +104,8 @@ public class SideBoard extends HBox implements BasicView {
 
         @Override
         public void generateView() {
-            VBox mainHolder = new VBox();
+            // Top most is controls
+            VBox mainHolder = new VBox(generateInvisibleBreak(), generateControls(), generateInvisibleBreak());
 
             // Change to another view
             for(VIEWS view : VIEWS.values()){
@@ -109,6 +116,26 @@ public class SideBoard extends HBox implements BasicView {
             mainHolder.getChildren().add(generateBreak());
 
             setContent(mainHolder);
+        }
+
+        private HBox generateControls(){
+            Button close = generateControlsButton(Colors.LIGHT_RED, event -> {
+                MainHolder.getInstance().writeData();
+                System.exit(0);
+            });
+
+            Button iconify = generateControlsButton(Colors.YELLOW, event -> {
+                Stage stage = (Stage) this.getScene().getWindow();
+                stage.setFullScreen(false);
+                stage.setIconified(true);
+            });
+
+            Button fullscreen = generateControlsButton(Colors.LIGHT_GREEN, event -> {
+                Stage stage = (Stage) this.getScene().getWindow();
+                stage.setFullScreen(!stage.isFullScreen());
+            });
+
+            return new HBox(5, close, iconify, fullscreen);
         }
 
         private Label generateChangeViewer(VIEWS view){
@@ -137,6 +164,18 @@ public class SideBoard extends HBox implements BasicView {
 
         private Rectangle generateInvisibleBreak(){
             return new Rectangle(1, 5, Color.TRANSPARENT);
+        }
+
+        private Button generateControlsButton(Color color, EventHandler<? super MouseEvent> handler){
+            final double radius = 7;
+            Button button = new Button();
+
+            button.setBackground(new Background(new BackgroundFill(color, null, null)));
+            button.setOnMouseClicked(handler);
+            button.setShape(new Circle(radius));
+            button.setMinSize(radius * 2, radius * 2);
+            button.setMaxSize(radius * 2, radius * 2);
+            return button;
         }
     }
 
