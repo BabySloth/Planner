@@ -43,7 +43,7 @@ public class AllEvents {
             }
         }
         // Longest events on top of shorter ones
-        occurrence.sort((o1, o2) -> -1 * Integer.compare(o1.getDaysLength(), o2.getDaysLength()));
+        occurrence.sort(new SortLength());
         return occurrence;
     }
 

@@ -17,6 +17,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 
 /**
@@ -77,7 +78,7 @@ public class CalendarView extends HBox implements BasicView{
      * change
      */
     private void updateLeftSection(){
-        scrollPane.setContent(new VBox(new CalendarShowCase(), new Timeline()));
+        scrollPane.setContent(new VBox(new CalendarContent(this)));
     }
 
     /**
@@ -283,17 +284,16 @@ public class CalendarView extends HBox implements BasicView{
             private final int position;
             private final LocalDate date;
             private final ArrayList<Event> events;
-            private final HashMap<Event, Integer> orders = new HashMap<>();
+            private final TreeMap<Integer, Event> orders = new TreeMap<>();
 
             CalendarBox(int position, LocalDate date, ArrayList<Event> events){
                 this.position = position;
                 this.date = date;
                 this.events = events;
                 this.setAlignment(Pos.TOP_RIGHT);
+
                 setMainDesign();
                 generateView();
-
-                setOnMouseClicked(e -> System.out.println(events.size()));
             }
 
             @Override
@@ -303,26 +303,62 @@ public class CalendarView extends HBox implements BasicView{
 
             @Override
             public void generateView() {
+                getChildren().clear();
+
                 // Label text
                 getChildren().add(generateDateDisplay());
 
                 // Events populate
+                positionEvents();
+                displayEvents();
+            }
+
+            private void positionEvents(){
                 int order = 0;
+                ArrayList<Event> starter = new ArrayList<>();
                 for(Event event : events){
-                    // EventDisplay information
-                    boolean isSunday = date.getDayOfWeek() == DayOfWeek.SUNDAY;
-                    boolean needsTitle = isSunday || event.getDaysLength() == 1;
-                    boolean isContinuation = !needsTitle || (isSunday && event.occurs(date.minusDays(1)));
-
-                    getChildren().addAll(generateBlank(1, 2), new EventDisplay(event, event.spanDays(),
-                                                                               isContinuation, needsTitle));
-
                     // First view has the highest of all calendarBoxes priority of positioning
                     if(position == 0){
+                        orders.put(order, event);
+                        // Add event to view depending on order
+                        order++;
+                    }else{
+                        TreeMap<Integer, Event> previousOrder = calendarBoxes[position - 1].getOrders();
 
+                        if(previousOrder.containsValue(event)){
+                            for(Integer previousPosition : previousOrder.keySet()){
+                                if(previousOrder.get(previousPosition).equals(event)){
+                                    orders.put(previousPosition, event);
+                                }
+                            }
+                        }else{
+                            starter.add(event);
+                        }
                     }
-                    order++;
+
+                    // Optimize to show as many events as possible
+                    // We want to shove in as many long events as possible
                 }
+            }
+
+            private void displayEvents(){
+                /*// EventDisplay information
+                boolean isSunday = date.getDayOfWeek() == DayOfWeek.SUNDAY;
+                boolean needsTitle = isSunday || event.getDaysLength() == 1 || event.getDateStart().equals(date);
+                boolean isContinuation = !needsTitle || (isSunday && event.occurs(date.minusDays(1)));
+
+                EventDisplay display = new EventDisplay(event, event.spanDays(), isContinuation, needsTitle);*/
+            }
+
+            private StackPane moreEvents(int amountMore){
+                Rectangle rectangle = new Rectangle(130, 20, Colors.LIGHT_BLUE);
+                Label label = new Label(String.format("%d more", amountMore));
+
+                StackPane stackPane = new StackPane(rectangle, label);
+                stackPane.setMinSize(130, 20);
+                stackPane.setPrefSize(130, 20);
+                stackPane.setMaxSize(130, 20);
+                return stackPane;
             }
 
             private Label generateDateDisplay(){
@@ -333,6 +369,15 @@ public class CalendarView extends HBox implements BasicView{
                 return generateLabel(text.toString(), date.equals(LocalDate.now()) ? Colors.YELLOW : Colors.LIGHT_GRAY,
                                      15, 130, 20);
             }
+
+            /**
+             * Ensures that TreeMap is immutable when another object accesses this object even if they are of the same
+             * type
+             * @return Copy of orders
+             */
+            public TreeMap<Integer, Event> getOrders(){
+                return (TreeMap<Integer, Event>) orders.clone();
+            }
         }
 
         private class Measurement{
@@ -340,18 +385,6 @@ public class CalendarView extends HBox implements BasicView{
             final static double cellWidth = 130;
             final static double cellHeight = 108;
         }
-    }
-
-    private class Timeline extends VBox{
-
-    }
-
-    private class EventDetail{
-
-    }
-
-    private class DatesInformation{
-
     }
 
     private class EventDisplay extends StackPane{
@@ -375,7 +408,8 @@ public class CalendarView extends HBox implements BasicView{
             setMaxSize(width, height);
 
             generateBackground();
-            generateText(); // Depends on position
+            if(needsTitle)
+                generateText(); // Depends on position
         }
 
         private void generateBackground(){
