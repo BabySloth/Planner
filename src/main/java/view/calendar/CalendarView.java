@@ -78,7 +78,9 @@ public class CalendarView extends HBox implements BasicView{
      * change
      */
     private void updateLeftSection(){
-        scrollPane.setContent(new VBox(new CalendarContent(this)));
+        scrollPane.setContent(new VBox(
+                new CalendarContent(this, allEvents)
+        ));
     }
 
     /**
@@ -170,7 +172,7 @@ public class CalendarView extends HBox implements BasicView{
             for(int row = 1; row < 7; row++){
                 for(int column = 0; column < 7; column++){
                     LocalDate boxDate = firstCalendarDate.plusDays(position);
-                    calendarBoxes[position] = new CalendarBox(position, boxDate, allEvents.getEventForDay(boxDate));
+//                    calendarBoxes[position] = new CalendarBox(position, boxDate, allEvents.getEventsForDay(boxDate));
                     content.add(calendarBoxes[position], column, row);
                     position++;
                 }
@@ -290,7 +292,7 @@ public class CalendarView extends HBox implements BasicView{
                 this.position = position;
                 this.date = date;
                 this.events = events;
-                this.setAlignment(Pos.TOP_RIGHT);
+
 
                 setMainDesign();
                 generateView();
@@ -423,7 +425,6 @@ public class CalendarView extends HBox implements BasicView{
             label.setPrefSize(width, height);
             label.setMaxSize(width, height);
             label.setTextFill(Colors.DARK_GRAY);
-            label.setAlignment(Pos.CENTER);
             this.getChildren().add(label);
         }
     }

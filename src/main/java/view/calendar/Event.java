@@ -168,4 +168,13 @@ public class Event {
         return String.format("%d.%d.%d.%d", timeStart.getHour(), timeStart.getMinute(),
                              timeEnd.getHour(), timeEnd.getMinute());
     }
+
+    @Override
+    public boolean equals(Object obj){
+        if(obj instanceof Event){
+            Event test = (Event) obj;
+            return test.getId().equals(this.id);
+        }
+        return false;
+    }
 }

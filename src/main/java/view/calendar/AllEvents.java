@@ -2,6 +2,7 @@ package view.calendar;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 public class AllEvents {
     private final ArrayList<Event> events = new ArrayList<>();
@@ -35,16 +36,29 @@ public class AllEvents {
      * @param date Date in which the events occur
      * @return Multiple events in id order
      */
-    public ArrayList<Event> getEventForDay(LocalDate date){
+    public ArrayList<Event> getSingleEvents(LocalDate date){
         ArrayList<Event> occurrence = new ArrayList<>();
-        for(Event event : events){
-            if(event.occurs(date)){
-                occurrence.add(event);
-            }
-        }
-        // Longest events on top of shorter ones
-        occurrence.sort(new SortLength());
+        events.stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() == 1).forEach(occurrence::add);
         return occurrence;
+    }
+
+    public ArrayList<Event> getMultiEvents(LocalDate date){
+        ArrayList<Event> occurrence = new ArrayList<>();
+        events.stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() > 1).forEach(occurrence::add);
+        return occurrence;
+    }
+
+    /**
+     * Gives all the events for the entire calendar
+     * @param startingDate First Sunday of the calendar
+     * @return TreeMap of events for the calendar
+     */
+    public TreeMap<Integer, ArrayList<Event>> getMultiEventsMap(LocalDate startingDate){
+        // Keys are never equal, so we don't need 0 for comparator
+        TreeMap<Integer, ArrayList<Event>> map = new TreeMap<>();
+        for(int i = 0; i < 42; i++)
+            map.put(i, getMultiEvents(startingDate.plusDays(i)));
+        return map;
     }
 
     /**

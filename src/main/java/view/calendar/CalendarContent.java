@@ -1,6 +1,8 @@
 package view.calendar;
 
 import helper.Colors;
+import helper.Measurement;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -12,16 +14,23 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import view.BasicView;
 
+import java.lang.reflect.Array;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeMap;
 
 class CalendarContent extends VBox implements BasicView {
     private LocalDate firstDate;
     private LocalDate displayDate;  // One week ahead of first date
     final private CalendarView headController;
+    final private AllEvents data;
+    private ArrayList<CalendarBox> calendarBoxes = new ArrayList<>(42);
 
-    CalendarContent(CalendarView headController){
+    CalendarContent(CalendarView headController, AllEvents data){
         this.headController = headController;
+        this.data = data;
         firstDate = firstSunday(LocalDate.now());
         displayDate = firstDate.plusWeeks(1);
 
@@ -98,18 +107,83 @@ class CalendarContent extends VBox implements BasicView {
         for(int i = 0; i < 6; i++){  // 6 rows
             LocalDate startingDate = firstDate.plusWeeks(i);
             container.getChildren().addAll(generateDayOfMonthDisplay(startingDate),
-                                           generateDateEventDisplay(startingDate));
+                                           generateDateEventDisplay());
+        }
+
+        // Set actual content to calendarBoxes
+        setCalendarBoxesContent();
+        return container;
+    }
+
+    private HBox generateDayOfMonthDisplay(LocalDate startingDate){
+        LocalDate date = startingDate;
+        HBox container = (HBox) generateContainer(new HBox(), Measurements.width, Measurements.eventHeight);
+
+        for(int i = 0; i < 7; i++){
+            int dayOfMonth = date.getDayOfMonth();
+            boolean hasMonthText = dayOfMonth == 1 || date.equals(firstDate);
+            String monthText = hasMonthText ? " - " + capitalize(date.getMonth().toString()) : "";
+            String dateString = String.format("%d%s", dayOfMonth, monthText);
+            Color color = date.equals(LocalDate.now()) ? Colors.YELLOW : Colors.LIGHT_GRAY;
+            container.getChildren().add(
+                    generateLabel(dateString, color, 15, Measurements.eventWidth, Measurements.eventHeight));
+
+            date = date.plusDays(1);
         }
 
         return container;
     }
 
-    private HBox generateDayOfMonthDisplay(LocalDate startingDate){
+    private ScrollPane generateDateEventDisplay() {
+        HBox mainContainer = (HBox) generateContainer(new HBox(), Measurements.width, Measurements.eventTotalHeight);
+
+        for(int i = 0; i < 7; i++){
+            int position = calendarBoxes.size();
+            CalendarBox box = new CalendarBox(firstDate.plusDays(position), position, firstDate);
+            calendarBoxes.add(box);
+            mainContainer.getChildren().add(box);
+        }
+
+        // Container and styling
+        ScrollPane overhead = new ScrollPane(mainContainer);
+        overhead.setMinSize(Measurements.width, Measurements.eventTotalHeight);
+        overhead.setPrefSize(Measurements.width, Measurements.eventTotalHeight);
+        overhead.setMaxSize(Measurements.width, Measurements.eventTotalHeight);
+        overhead.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        overhead.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        overhead.getStyleClass().add("scrollPane");
+
+        return overhead;
+    }
+
+    private void setCalendarBoxesContent(){
+        // First add all the long events
+        TreeMap<Integer, ArrayList<Event>> longEvents = data.getMultiEventsMap(firstDate);
+        int maxLongOrder = maxLongOrder(longEvents);
+
+        for(int order = 0; order < maxLongOrder; order++){
+            int mapKey = 0;
+            for(CalendarBox box : calendarBoxes){
+                if(longEvents.get(mapKey).size() == 0) {
+                    mapKey++;
+                    continue;
+                }
+                box.addLongEvent(order, longEvents.get(mapKey).get(0));
+                longEvents.get(mapKey).remove(0);  // Remove event from list of events to add
+
+                mapKey++;
+            }
+        }
+
+        // Add short events
 
     }
 
-    private ScrollPane generateDateEventDisplay(LocalDate startingDate){
-
+    private int maxLongOrder(TreeMap<Integer, ArrayList<Event>> events){
+        int max = 0;
+        for(ArrayList<Event> eventList : events.values())
+            max = eventList.size() > max ? eventList.size() : max;
+        return max;
     }
 
     private Pane generateContainer(Pane container, double width, double height){
@@ -174,6 +248,7 @@ class CalendarContent extends VBox implements BasicView {
         label.setTextFill(color);
         label.setFont(Font.font(fontSize));
         label.setMaxSize(width, height);
+        label.setPrefSize(width, height);
         label.setMinSize(width, height);
         return label;
     }
@@ -250,5 +325,9 @@ class CalendarContent extends VBox implements BasicView {
         final static double daysOfWeekWidth = cellWidth;
         final static double daysOfWeekHeight = 20;
         final static double daysOfWeekFontSize = 15;
+
+        final static double eventWidth = cellWidth;
+        final static double eventHeight = 20;
+        final static double eventTotalHeight = 80;
     }
 }
