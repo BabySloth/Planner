@@ -4,6 +4,7 @@ import helper.Blank;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
 import java.time.DayOfWeek;
@@ -11,13 +12,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class CalendarBox extends VBox {
+    private final CalendarContent parent;
     private final LocalDate date;
     private final int position;
     private final LocalDate firstDate;
     private int longOrder = 0;
     private final ArrayList<Event> longEvents = new ArrayList<>();
 
-    public CalendarBox(LocalDate date, int position, LocalDate firstDate){
+    CalendarBox(CalendarContent parent, LocalDate date, int position, LocalDate firstDate){
+        this.parent = parent;
         this.date = date;
         this.position = position;
         this.firstDate = firstDate;
@@ -26,7 +29,19 @@ public class CalendarBox extends VBox {
         this.setMaxWidth(130);
         setAlignment(Pos.TOP_LEFT);
 
-        setOnMouseClicked(e -> System.out.println(getChildren()));
+        setOnMouseClicked(this::clickedOn);
+    }
+
+    private void clickedOn(MouseEvent e){
+        if(e.isShortcutDown() || e.isShiftDown()) {
+            if(date.equals(parent.getSecondSelection())){
+                parent.setSecondSelection(null);
+            }else{
+                parent.setSecondSelection(date);
+            }
+        } else {
+            parent.setFirstSelection(date);
+        }
     }
 
     public void addShortEvent(ArrayList<Event> events){

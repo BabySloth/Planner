@@ -2,6 +2,7 @@ package view.calendar;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.TreeMap;
 
 public class AllEvents {
@@ -32,25 +33,62 @@ public class AllEvents {
     }
 
     /**
-     * Gives all events that occurs on the given time.
-     * @param date Date in which the events occur
-     * @return Multiple events in id order
+     * Gives all the events that occurs on the given date
+     * @param date Events based on this date
+     * @return List of all the events
      */
-    public ArrayList<Event> getSingleEvents(LocalDate date){
+    public ArrayList<Event> getEvents(LocalDate date){
         ArrayList<Event> occurrence = new ArrayList<>();
-        events.stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() == 1).forEach(o1 -> {
+        events.stream().filter(o1 -> o1.occurs(date)).forEach(o1 -> {
             occurrence.add(o1);
-            o1.setOrder(-1);  // Reset value
+            o1.setOrder(-1); // defaults the value
         });
         return occurrence;
     }
 
+    /**
+     * Gives all the events that occurs on the given range
+     * @param date1 Starting date (Will check and fix against date2) cannot be null
+     * @param date2 Ending date (Will check and fix against date1) can be null
+     * @return Set of all events that occurs in the given range
+     */
+    public HashSet<Event> getEvents(LocalDate date1, LocalDate date2){
+        // Makes sure no value is null
+        if(date2 == null){
+            return new HashSet<>(getEvents(date1));
+        }
+        // Makes sure that date1 is always before date2
+        if(date2.isBefore(date1)){
+            return getEvents(date2, date1);
+        }
+        HashSet<Event> occurrence = new HashSet<>();
+        while(date1.isBefore(date2.plusDays(1))){
+            occurrence.addAll(getEvents(date1));
+            date1 = date1.plusDays(1);
+        }
+        return occurrence;
+    }
+
+    /**
+     * Gives all events that occur on the given time only (one day events).
+     * @param date Date in which the events occurs
+     * @return Events
+     */
+    public ArrayList<Event> getSingleEvents(LocalDate date){
+        ArrayList<Event> occurrence = new ArrayList<>();
+        getEvents(date).stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() == 1).forEach(occurrence::add);
+        return occurrence;
+    }
+
+    /**
+     * Gives all events that occur on the given time (event can start another day).
+     * @param date Date in which the event occurs
+     * @return Events
+     */
     public ArrayList<Event> getMultiEvents(LocalDate date){
         ArrayList<Event> occurrence = new ArrayList<>();
-        events.stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() > 1).forEach(o1 -> {
-            occurrence.add(o1);
-            o1.setOrder(-1);  // Reset value
-        });
+        getEvents(date).stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() > 1).forEach(occurrence::add);
+        occurrence.sort(new Sort.LongestFirst());
         return occurrence;
     }
 
@@ -89,7 +127,6 @@ public class AllEvents {
     public Event[] getAllEvents(){
         return events.toArray(new Event[0]);
     }
-
 
     private int toInt(String string){
         return Integer.parseInt(string);
