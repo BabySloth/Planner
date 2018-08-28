@@ -1,4 +1,4 @@
-package view.calendar;
+package helper;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;

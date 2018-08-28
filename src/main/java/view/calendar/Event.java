@@ -17,6 +17,7 @@ public class Event {
     private LocalTime timeStart;  //Time uses 24h clock
     private LocalTime timeEnd = null;
     private String color;  // Hexadecimal
+    private int order = -1;
 
     public Event(String id, String title, String description, String date, String time, String color){
         this.id = id;
@@ -151,6 +152,14 @@ public class Event {
         this.color = color;
     }
 
+    public int getOrder(){
+        return order;
+    }
+
+    public void setOrder(int order){
+        this.order = order;
+    }
+
     public String[] getData(){
         String[] data = new String[5];
         data[0] = title;
@@ -176,5 +185,10 @@ public class Event {
             return test.getId().equals(this.id);
         }
         return false;
+    }
+
+    @Override
+    public String toString(){
+        return String.format("Date: %s Id: %s Title: %s", dateStart, id, title);
     }
 }

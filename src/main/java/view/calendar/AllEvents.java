@@ -38,13 +38,19 @@ public class AllEvents {
      */
     public ArrayList<Event> getSingleEvents(LocalDate date){
         ArrayList<Event> occurrence = new ArrayList<>();
-        events.stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() == 1).forEach(occurrence::add);
+        events.stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() == 1).forEach(o1 -> {
+            occurrence.add(o1);
+            o1.setOrder(-1);  // Reset value
+        });
         return occurrence;
     }
 
     public ArrayList<Event> getMultiEvents(LocalDate date){
         ArrayList<Event> occurrence = new ArrayList<>();
-        events.stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() > 1).forEach(occurrence::add);
+        events.stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() > 1).forEach(o1 -> {
+            occurrence.add(o1);
+            o1.setOrder(-1);  // Reset value
+        });
         return occurrence;
     }
 

@@ -1,24 +1,24 @@
 package view.calendar;
 
+import helper.Blank;
 import helper.Colors;
 import helper.Measurement;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 import view.BasicView;
+import helper.ElementGenerator;
 
-import java.lang.reflect.Array;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Optional;
 import java.util.TreeMap;
 
 class CalendarContent extends VBox implements BasicView {
@@ -26,7 +26,8 @@ class CalendarContent extends VBox implements BasicView {
     private LocalDate displayDate;  // One week ahead of first date
     final private CalendarView headController;
     final private AllEvents data;
-    private ArrayList<CalendarBox> calendarBoxes = new ArrayList<>(42);
+    private ArrayList<CalendarBox> calendarBoxes;
+    private Type showing = Type.CALENDAR;
 
     CalendarContent(CalendarView headController, AllEvents data){
         this.headController = headController;
@@ -45,11 +46,28 @@ class CalendarContent extends VBox implements BasicView {
 
     @Override
     public void generateView() {
+        // Reset
         getChildren().clear();
-        getChildren().addAll(generateManipulatorControls(),
-                             generateDaysOfWeekDisplay(),
-                             generateCalendarDisplay());
+        calendarBoxes = new ArrayList<>(42);
+        displayDate = firstDate.plusWeeks(1);
+
+        getChildren().add(generateManipulatorControls());
+        switch(showing){
+            case CALENDAR:
+                getChildren().addAll(generateDaysOfWeekDisplay(), generateCalendarDisplay());
+                break;
+            case YEAR:
+                getChildren().add(generateYearChanger());
+                break;
+            case MONTH:
+                getChildren().add(generateMonthChanger());
+                break;
+        }
     }
+
+    // ----------------
+    // View manipulator
+    // ----------------
 
     /**
      * Changes what is being shown
@@ -58,25 +76,165 @@ class CalendarContent extends VBox implements BasicView {
     private HBox generateManipulatorControls(){
         double width = Measurements.manipulatorWidth;
         double height = Measurements.manipulatorHeight;
-        double fontSize = Measurements.manipulatorFontSize;
+        String[] style = {"labelFont15", "buttonCalendar"};
+        LocalDate now = LocalDate.now();
 
-        Button year = generateButton(String.valueOf(displayDate.getYear()), width, height, fontSize,
-                                     sameYear(displayDate) ? Colors.YELLOW : Colors.LIGHT_GRAY);
-        year.setOnAction(e -> System.out.println("Ran year"));
-        Button month = generateButton(capitalize(displayDate.getMonth().toString()), width, height, fontSize,
-                                      sameYearMonth(displayDate) ? Colors.YELLOW : Colors.LIGHT_GRAY);
-        month.setOnAction(e -> System.out.println("Ran month"));
-        Rectangle empty = generateBlank(Measurements.manipulatorBlank, 1);
+        int yearNow = now.getYear();
+        int yearDecrementNumber = displayDate.getYear() - 1;
+        Button yearDecrement = generateDecrementButton(yearDecrementNumber == yearNow ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
+        yearDecrement.setOnAction(e -> changeYear(yearDecrementNumber));
+        Button year = ElementGenerator.button(String.valueOf(displayDate.getYear()), sameYear(displayDate) ? Colors.YELLOW : Colors.LIGHT_GRAY,
+                                              width, height, style);
+        year.setOnAction(e -> {
+            showing = Type.YEAR;
+            generateView();
+        });
+        int yearIncrementNumber = displayDate.getYear() + 1;
+        Button yearIncrement = generateIncrementButton(yearIncrementNumber == now.getYear() ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
+        yearIncrement.setOnAction(e -> changeYear(yearIncrementNumber));
 
-        double weekWidthHeight = Measurements.manipulatorWeekWidthHeight;
-        Button previousWeek = generateButton("<", weekWidthHeight, weekWidthHeight, fontSize, Colors.LIGHT_GRAY);
-        previousWeek.setOnAction(e -> changeFirstDateByWeek(-1));
-        Button nextWeek = generateButton(">", weekWidthHeight, weekWidthHeight, fontSize, Colors.LIGHT_GRAY);
-        nextWeek.setOnAction(e -> changeFirstDateByWeek(1));
+        LocalDate previousMonth = displayDate.minusMonths(1);
+        Button monthDecrement = generateDecrementButton(sameYearMonth(previousMonth) ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
+        monthDecrement.setOnAction(e -> changeFirstDate(previousMonth));
+        Button month = ElementGenerator.button(capitalize(displayDate.getMonth().toString()), sameYearMonth(displayDate) ? Colors.YELLOW : Colors.LIGHT_GRAY,
+                                               width, height, style);
+        month.setOnAction(e -> {
+            showing = Type.MONTH;
+            generateView();
+        });
+        LocalDate nextMonth = displayDate.plusMonths(1);
+        Button monthIncrement = generateIncrementButton(sameYearMonth(nextMonth) ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
+        monthIncrement.setOnAction(e -> changeFirstDate(nextMonth));
+        Rectangle empty = new Blank(Measurements.manipulatorBlank, 1);
 
-        return (HBox) generateContainer(new HBox(year, month, empty, previousWeek, nextWeek),
-                                        Measurements.width, height);
+        // Change to today
+        Button today = ElementGenerator.button("Today", Colors.YELLOW, width, height, style);
+        today.setOnAction(e -> changeFirstDate(now));
+
+        // Use firstDate because you change week depending on the first day of the month. displayingDate is always
+        // one week after firstDate.
+        LocalDate previousWeekDate = firstDate.minusWeeks(1);
+        Button previousWeek = generateDecrementButton(sameWeekOfYear(previousWeekDate) ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
+        previousWeek.setOnAction(e -> changeFirstDate(previousWeekDate));
+        LocalDate nextWeekDate = firstDate.plusWeeks(1);
+        Button nextWeek = generateIncrementButton(sameWeekOfYear(nextWeekDate) ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
+        nextWeek.setOnAction(e -> changeFirstDate(nextWeekDate));
+
+        return (HBox) ElementGenerator.pane(new HBox(yearDecrement, year, yearIncrement, monthDecrement, month, monthIncrement, today,
+                                                     empty, previousWeek, nextWeek), Measurements.width, height);
     }
+
+    /**
+     * Creates the view to showcase the 12 months to choose from
+     * @return view
+     */
+    private GridPane generateMonthChanger(){
+        double columnWidth = Measurements.width / 4;
+        double rowHeight = Measurements.height / 3;
+        GridPane container = ElementGenerator.gridPane(3, 4, rowHeight, columnWidth);
+
+        int counter = 1;
+        for(int row = 0; row < 3; row++){
+            for(int column = 0; column < 4; column++){
+                int monthNumber = counter;
+                boolean isCurrentMonth = monthNumber == LocalDate.now().getMonthValue();
+                String text = capitalize(Month.of(monthNumber).toString());
+                Color color = isCurrentMonth ? Colors.YELLOW : Colors.LIGHT_GRAY;
+                Button button = ElementGenerator.button(text, color, columnWidth, rowHeight, "buttonCalendar", "labelFont30");
+                button.setOnAction(e -> changeMonth(monthNumber));
+                container.add(button, column, row);
+                counter++;
+            }
+        }
+        return container;
+    }
+
+    /**
+     * Change calendar view to show the given month number
+     * Value of 0 and 13 are from {@link #generateDecrementButton(Color, String...)} and
+     * {@link #generateIncrementButton(Color, String...)} respectively.
+     * @param monthNumber What month to change to (Only values 0 to 13 inclusive)
+     */
+    private void changeMonth(int monthNumber){
+        if(monthNumber == 13){ // Increment
+            changeFirstDate(firstDate.plusMonths(1));
+        }else if(monthNumber < 1){ // Decrement
+            changeFirstDate(firstDate = firstDate.minusMonths(1));
+        }else{
+            changeFirstDate(firstDate = LocalDate.of(firstDate.getYear(), monthNumber, 1));
+        }
+    }
+
+    /**
+     * Creates a view to change the year
+     * @return New view
+     */
+    private VBox generateYearChanger(){
+        LocalDate now = LocalDate.now();
+        int firstYearChoice = now.minusYears(2).getYear();
+
+        // Quick change month
+        HBox yearContainer = (HBox) ElementGenerator.pane(new HBox(), Measurements.width, Measurements.cellHeight);
+        for(int additionalYear = 0; additionalYear < 7; additionalYear++){
+            int year = firstYearChoice + additionalYear;
+            String text = " " + String.valueOf(year);
+            Color color = year == now.getYear() ? Colors.YELLOW : Colors.LIGHT_GRAY;
+
+            Button button = ElementGenerator.button(text, color, Measurements.cellWidth, Measurements.cellHeight, "buttonCalendar", "labelFont30");
+            button.setOnAction(e -> changeYear(year));
+
+            yearContainer.getChildren().add(button);
+        }
+
+        // Increment decrement changer
+
+
+        return (VBox) ElementGenerator.pane(new VBox(yearContainer), Measurements.width, Measurements.cellHeight * 2);
+    }
+
+    /**
+     * Change the calendar view to the given year maintaining the day of year if possible
+     * @param year
+     */
+    private void changeYear(int year){
+        // Tries to maintain the first sunday displayed, but in every year, the date changes day of week
+        changeFirstDate(LocalDate.ofYearDay(year, firstDate.getDayOfYear()));
+    }
+
+    /**
+     * If you want to change the first date of the year, call this function
+     */
+    private void changeFirstDate(LocalDate newDate){
+        firstDate = firstSunday(newDate);
+        showing = Type.CALENDAR;
+        generateView();
+    }
+
+    /**
+     * Generates a button to decrement something
+     * @param color Color of text
+     * @param style Styleclass to add
+     * @return New button
+     */
+    private Button generateDecrementButton(Color color, String... style) {
+        return ElementGenerator.button("<", color, Measurements.manipulatorWeekWidthHeight,
+                                       Measurements.manipulatorWeekWidthHeight, style);
+    }
+
+    /**
+     * Generates a button to increment something
+     * @param color Color of text
+     * @param style Styleclass to add
+     * @return New button
+     */
+    private Button generateIncrementButton(Color color, String... style){
+        return ElementGenerator.button(">", color, Measurements.manipulatorWeekWidthHeight,
+                                       Measurements.manipulatorWeekWidthHeight, style);
+    }
+
+    // ----------------
+    // Calendar contents
+    // ----------------
 
     /**
      * Shows what day of the week each column represents. Highlights in yellow if the calendar is showing the current
@@ -84,25 +242,29 @@ class CalendarContent extends VBox implements BasicView {
      * @return Second view section (of three)
      */
     private HBox generateDaysOfWeekDisplay(){
-        HBox container = (HBox) generateContainer(new HBox(), Measurements.width, Measurements.daysOfWeekHeight);
+        HBox container = (HBox) ElementGenerator.pane(new HBox(), Measurements.width, Measurements.daysOfWeekHeight);
 
-        double fontSize = Measurements.daysOfWeekFontSize;
         double width = Measurements.daysOfWeekWidth;
         double height = Measurements.daysOfWeekHeight;
         final String[] daysOfWeekNames = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
         for(String name : daysOfWeekNames){
-            Label label = generateLabel(name, sameYearMonthDayWeek(name) ? Colors.YELLOW : Colors.LIGHT_GRAY,
-                                        fontSize, width, height);
+            // Leading space to prevent jumbled text
+            Label label = ElementGenerator.label(" " + name, sameYearMonthDayWeek(name) ? Colors.YELLOW : Colors.LIGHT_GRAY,
+                                        width, height, "labelFont15");
             container.getChildren().add(label);
         }
 
         return container;
     }
 
+    /**
+     * Generates the main body of the calendar
+     * @return Main view
+     */
     private VBox generateCalendarDisplay(){
         double width = Measurements.width;
         double height = Measurements.height;
-        VBox container = (VBox) generateContainer(new VBox(), width, height);
+        VBox container = (VBox) ElementGenerator.pane(new VBox(), width, height);
 
         for(int i = 0; i < 6; i++){  // 6 rows
             LocalDate startingDate = firstDate.plusWeeks(i);
@@ -115,18 +277,23 @@ class CalendarContent extends VBox implements BasicView {
         return container;
     }
 
+    /**
+     * Gives the day of month for the week (Ex. 1 - December
+     * @param startingDate Date of the first Sunday of the week
+     * @return Container of labels
+     */
     private HBox generateDayOfMonthDisplay(LocalDate startingDate){
         LocalDate date = startingDate;
-        HBox container = (HBox) generateContainer(new HBox(), Measurements.width, Measurements.eventHeight);
+        HBox container = (HBox) ElementGenerator.pane(new HBox(), Measurements.width, Measurements.eventHeight);
 
         for(int i = 0; i < 7; i++){
             int dayOfMonth = date.getDayOfMonth();
             boolean hasMonthText = dayOfMonth == 1 || date.equals(firstDate);
             String monthText = hasMonthText ? " - " + capitalize(date.getMonth().toString()) : "";
-            String dateString = String.format("%d%s", dayOfMonth, monthText);
+            String dateString = String.format("  %d%s", dayOfMonth, monthText); // Leading space to prevent jumbled text
             Color color = date.equals(LocalDate.now()) ? Colors.YELLOW : Colors.LIGHT_GRAY;
             container.getChildren().add(
-                    generateLabel(dateString, color, 15, Measurements.eventWidth, Measurements.eventHeight));
+                    ElementGenerator.label(dateString, color, Measurements.eventWidth, Measurements.eventHeight, "labelFont15"));
 
             date = date.plusDays(1);
         }
@@ -134,8 +301,12 @@ class CalendarContent extends VBox implements BasicView {
         return container;
     }
 
+    /**
+     * Backbone of calendarBoxes. Doesn't actually show anything until it calls {@link #setCalendarBoxesContent()}
+     * @return Container
+     */
     private ScrollPane generateDateEventDisplay() {
-        HBox mainContainer = (HBox) generateContainer(new HBox(), Measurements.width, Measurements.eventTotalHeight);
+        HBox mainContainer = (HBox) ElementGenerator.pane(new HBox(), Measurements.width, Measurements.eventTotalHeight);
 
         for(int i = 0; i < 7; i++){
             int position = calendarBoxes.size();
@@ -156,6 +327,9 @@ class CalendarContent extends VBox implements BasicView {
         return overhead;
     }
 
+    /**
+     * Adds content to the CalendarBoxes
+     */
     private void setCalendarBoxesContent(){
         // First add all the long events
         TreeMap<Integer, ArrayList<Event>> longEvents = data.getMultiEventsMap(firstDate);
@@ -168,17 +342,59 @@ class CalendarContent extends VBox implements BasicView {
                     mapKey++;
                     continue;
                 }
-                box.addLongEvent(order, longEvents.get(mapKey).get(0));
-                longEvents.get(mapKey).remove(0);  // Remove event from list of events to add
+                ArrayList<Event> events = longEvents.get(mapKey);
+                Event event = events.get(0);
+
+                if(event.getOrder() == -1){
+                    if(firstOccurrence(event, longEvents, mapKey)){
+                        event.setOrder(order);
+                    }else if(events.size() > 1){
+                        int position = mapKey;
+                        Optional<Event> possibleEvent = events.stream().filter(o1 -> firstOccurrence(o1, longEvents, position)).findFirst();
+                        if(possibleEvent.isPresent()){
+                            event = possibleEvent.get();
+                            event.setOrder(order);
+                        }else{
+                            mapKey++;
+                            continue;
+                        }
+                    }else{
+                        mapKey++;
+                        continue;
+                    }
+                }
+                box.addLongEvent(event.getOrder(), event);
+                longEvents.get(mapKey).remove(event);  // Remove event from list of events to add
 
                 mapKey++;
             }
         }
 
         // Add short events
-
+        calendarBoxes.forEach(o1 -> o1.addShortEvent(data.getSingleEvents(o1.getDate())));
     }
 
+    /**
+     * Determines if the event starts at an earlier date in the calendar display
+     * @param event What event to check for
+     * @param events What events are shown
+     * @param position What position in the calendar
+     * @return If the event first occurrence is at the given position
+     */
+    private boolean firstOccurrence(Event event, TreeMap<Integer, ArrayList<Event>> events, int position){
+        for(int i = 0; i < position; i++){
+            if(events.get(i).contains(event)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Gives the maximum amount of long events in a day given a map.
+     * @param events Map linking position and amount of long days of each position
+     * @return The amount of times each {@link view.calendar.CalendarBox} should have long events added
+     */
     private int maxLongOrder(TreeMap<Integer, ArrayList<Event>> events){
         int max = 0;
         for(ArrayList<Event> eventList : events.values())
@@ -186,72 +402,7 @@ class CalendarContent extends VBox implements BasicView {
         return max;
     }
 
-    private Pane generateContainer(Pane container, double width, double height){
-        container.setMinSize(width, height);
-        container.setPrefSize(width, height);
-        container.setMaxSize(width, height);
-
-        return container;
-    }
-
-    /**
-     * Creates a button with design.
-     * @param text Text displayed on the button (Added space to prevent cramping)
-     * @param width Width of the button
-     * @param height Height of the button
-     * @param fontSize Use a double value for {@link Font}
-     * @param color Using {@link Colors}
-     * @return A new button
-     */
-    private Button generateButton(String text, double width, double height, double fontSize, Color color){
-        Button button = new Button(" " + text);
-        button.setPrefSize(width, height);
-        button.setFont(Font.font(fontSize));
-        button.setTextFill(color);
-        button.getStyleClass().add("buttonCalendar");
-
-        return button;
-    }
-
-    /**
-     * A transparent rectangle to act as a space taker up.
-     * @param width Width of the invisible rectangle.
-     * @param height Height of the invisible rectangle.
-     * @return A new space taker
-     */
-    private Rectangle generateBlank(double width, double height){
-        return new Rectangle(width, height, Color.TRANSPARENT);
-    }
-
-    /**
-     * Changes the first day of the month view by a week. Will call {@link #generateView()} to show the user the new
-     * changes.
-     * @param amount Negative or positive
-     */
-    private void changeFirstDateByWeek(int amount){
-        firstDate = firstDate.plusWeeks(amount);
-        displayDate = firstDate.plusWeeks(1);
-        generateView();
-    }
-
-    /**
-     * Generates a label with design.
-     * @param text Text on the label
-     * @param color Color on the label using {@link Colors}
-     * @param fontSize Double value for font using {@link Font}
-     * @param width Width of label
-     * @param height Height of label
-     * @return A new button
-     */
-    private Label generateLabel(String text, Color color, double fontSize, double width, double height){
-        Label label = new Label(" " + text); // Leading space to prevent jumbled text
-        label.setTextFill(color);
-        label.setFont(Font.font(fontSize));
-        label.setMaxSize(width, height);
-        label.setPrefSize(width, height);
-        label.setMinSize(width, height);
-        return label;
-    }
+    // Helper functions
 
     /**
      * Returns the most recent past Sunday; can be itself.
@@ -282,6 +433,18 @@ class CalendarContent extends VBox implements BasicView {
     private boolean sameYearMonth(LocalDate date){
         LocalDate now = LocalDate.now();
         return sameYear(date) && date.getMonthValue() == now.getMonthValue();
+    }
+
+    /**
+     * Checks If the current day is part of the week of the given date
+     * @param date First date of the week
+     * @return If the current day is part of the week of the given date
+     */
+    private boolean sameWeekOfYear(LocalDate date){
+        for(int i = 1; i < 7; i++)
+            if(date.plusDays(i).equals(LocalDate.now()))
+                return true;
+        return false;
     }
 
     /**
@@ -320,14 +483,24 @@ class CalendarContent extends VBox implements BasicView {
         final static double manipulatorHeight = 40;
         final static double manipulatorFontSize = 15;
         final static double manipulatorWeekWidthHeight = 40;
-        final static double manipulatorBlank = width - (2 * manipulatorWidth) - (manipulatorWeekWidthHeight * 2);
+        final static double manipulatorBlank = width - (3 * manipulatorWidth) - (manipulatorWeekWidthHeight * 6);
 
         final static double daysOfWeekWidth = cellWidth;
         final static double daysOfWeekHeight = 20;
-        final static double daysOfWeekFontSize = 15;
 
         final static double eventWidth = cellWidth;
         final static double eventHeight = 20;
         final static double eventTotalHeight = 80;
     }
+
+    public enum Type{
+        CALENDAR,
+        MONTH,
+        YEAR
+    }
+
+    public void setShowing(Type showing){
+        this.showing = showing;
+    }
+    
 }

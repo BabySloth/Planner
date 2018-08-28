@@ -1,6 +1,9 @@
 package view.calendar;
 
+import helper.Blank;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
 import java.time.DayOfWeek;
@@ -23,18 +26,25 @@ public class CalendarBox extends VBox {
         this.setMaxWidth(130);
         setAlignment(Pos.TOP_LEFT);
 
-        setOnMouseClicked(e -> System.out.println(position));
+        setOnMouseClicked(e -> System.out.println(getChildren()));
     }
 
-    public void addShortEvent(int maxShortOrder, ArrayList<Event> events){
-        int shortOrder = 0;
-        for(Event event : events){
-            getChildren().add(new EventDisplay(event, true, false, 1));
-            shortOrder++;
-        }
-        while(shortOrder != maxShortOrder){
-            getChildren().add(new Blank(1, 20));
-            shortOrder++;
+    public void addShortEvent(ArrayList<Event> events){
+        ObservableList<Node> children = getChildren();
+
+        mainLoop: for(Event event : events){
+            EventDisplay display = new EventDisplay(event, true, false, 1);
+
+            for(int i = 0; i < children.size(); i++){
+                Node node = children.get(i);
+                if(node instanceof Blank){
+                    children.remove(node);
+                    children.add(i, display);
+                    continue mainLoop;
+                }
+            }
+
+            children.add(display);
         }
     }
 
@@ -50,16 +60,11 @@ public class CalendarBox extends VBox {
         boolean isContinuation = eventStart.isAfter(firstDate.minusDays(1)) && eventStart.isBefore(date);
         int cellWraps = 0;
 
-        LocalDate temp = eventStart;
+        LocalDate temp = date;
         do{
             temp = temp.plusDays(1);
             cellWraps++;
         }while(temp.getDayOfWeek() != DayOfWeek.SUNDAY && event.occurs(temp));
-
-        if(needsTitle){
-            System.out.println(cellWraps);
-            setStyle("-fx-background-color: yellow;");
-        }
 
         // Fill gaps with empty spaces
         while(order != longOrder){
@@ -70,6 +75,10 @@ public class CalendarBox extends VBox {
         longEvents.add(event);
 
         longOrder++;
+    }
+
+    public LocalDate getDate(){
+        return date;
     }
 
     private class Measurements{

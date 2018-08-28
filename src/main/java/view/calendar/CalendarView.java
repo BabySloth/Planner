@@ -29,34 +29,23 @@ public class CalendarView extends HBox implements BasicView{
     private boolean containsWarning = false;
     private AllEvents allEvents;
 
-    // Children content
-    ScrollPane scrollPane = new ScrollPane();
+    private final CalendarContent calendarContent;
 
     public CalendarView(MainHolder parent, AllEvents allEvents){
         this.parent = parent;
         this.allEvents = allEvents;
+        calendarContent = new CalendarContent(this, allEvents);
+
         setMainDesign();
         generateView();
     }
 
     @Override
     public void generateView() {
-        getChildren().clear();
         // View is divided into two section: left and right.
 
         // Left view
-        // Contains the calendar and the timeline
-        // Design
-        scrollPane.getStyleClass().add("scrollPane");
-        scrollPane.setPrefSize(Measurement.LEFT_WIDTH, helper.Measurement.SCREEN_HEIGHT);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-
-        // Content
-        updateLeftSection();
-        getChildren().add(scrollPane);
-
+        getChildren().add(calendarContent);
 
         // Right view
         // Contains the event details and date details (range of date, amount of days until)
@@ -69,18 +58,6 @@ public class CalendarView extends HBox implements BasicView{
         final double starting_xcor =  helper.Measurement.STARTING_XCOR;
         relocate(starting_xcor, 0);
         setPrefSize(helper.Measurement.SCREEN_WIDTH - starting_xcor, helper.Measurement.SCREEN_HEIGHT);
-    }
-
-    /**
-     * Updates both the timeline and the calendar display. It does not necessarily mean that there will be a change
-     * since the changes in view are based off of their respective starting variable. For example, to update the
-     * calendar, you must first update the firstCalendarDate then this method. Missing one or both results in no
-     * change
-     */
-    private void updateLeftSection(){
-        scrollPane.setContent(new VBox(
-                new CalendarContent(this, allEvents)
-        ));
     }
 
     /**
@@ -141,13 +118,11 @@ public class CalendarView extends HBox implements BasicView{
         }
 
         /**
-         * Changes the first day of the month view by a week. Will call {@link #updateLeftSection()} to show the user
          * the new changes.
          * @param amount Negative or positive
          */
         private void changeFirstCalendarDateByWeek(int amount){
             firstCalendarDate = firstCalendarDate.plusWeeks(amount);
-            updateLeftSection();
         }
 
         /**

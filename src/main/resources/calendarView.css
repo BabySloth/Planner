@@ -12,3 +12,11 @@
 .buttonCalendar:hover{
     -fx-background-color: #292929;
 }
+
+.labelFont15{
+    -fx-font-size: 15px;
+}
+
+.labelFont30{
+    -fx-font-size: 30px;
+}

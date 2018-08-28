@@ -13,6 +13,7 @@ import view.BasicView;
 public class EventDisplay extends StackPane implements BasicView {
     private final Event event;
     private final boolean needsTitle;
+    private final boolean isContinuation;
     private final int cellWraps;
     private final double width;
     private final double height;
@@ -20,25 +21,27 @@ public class EventDisplay extends StackPane implements BasicView {
     EventDisplay(Event event, boolean needsTitle, boolean isContinuation, int cellWraps) {
         this.event = event;
         this.needsTitle = needsTitle;
+        this.isContinuation = isContinuation;
         this.cellWraps = cellWraps;
 
         // Sizing
         height = 20;
         width = isContinuation ? 130 : 120;
 
-        System.out.println(isContinuation);
-
         setMinSize(width, height);
         setPrefSize(width, height);
         setMaxSize(width, height);
 
         setAlignment(Pos.TOP_LEFT);
+        setMainDesign();
         generateView();
     }
 
     @Override
     public void setMainDesign() {
-
+        if(!isContinuation){
+            setStyle("-fx-padding: 0px 5px 0px 5px");  // Makes it so it doesn't touch another an adjacent EventDisplay
+        }
     }
 
     @Override
@@ -56,7 +59,6 @@ public class EventDisplay extends StackPane implements BasicView {
     }
 
     private Rectangle generateBackground(){
-        //return new Rectangle(width, height, event.getColor());
         return new Rectangle(width, height, Color.TRANSPARENT);
     }
 
@@ -65,7 +67,6 @@ public class EventDisplay extends StackPane implements BasicView {
         // Force size
         // Label can extend as far as the event spans
         double specialWidth = width + (cellWraps - 1) * 130;
-        System.out.println(specialWidth);
         label.setMinSize(specialWidth, height);
         label.setPrefSize(specialWidth, height);
         label.setMaxSize(specialWidth, height);
