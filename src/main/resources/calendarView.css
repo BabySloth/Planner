@@ -16,10 +16,50 @@
 .text-field{
     -fx-background-color: #3e3e3e;
     -fx-text-box-border: transparent;
+    -fx-text-fill: #F0EDEE;
 }
 
 .text-field:focused {
     -fx-focus-color: #292929;
+}
+
+.textArea{
+    -fx-background-color: #3e3e3e;
+    -fx-text-fill: #F0EDEE;
+}
+
+.textArea .scroll-pane{
+    -fx-background-color: transparent;
+}
+
+.textArea .scroll-pane .viewport{
+    -fx-background-color: transparent;
+}
+
+.textArea .scroll-pane .content{
+    -fx-background-color: transparent;
+}
+
+.comboBox{
+    -fx-background-color: #3e3e3e;
+    -fx-text-fill: #F0EDEE;
+}
+
+.comboBox .list-cell {
+    -fx-background-color: #3e3e3e;
+    -fx-text-fill: #F0EDEE;
+}
+
+.comboBox .list-view {
+    -fx-background-color: #3e3e3e;
+}
+
+.comboBox .list-view .list-cell:filled:hover{
+    -fx-background-color: #292929;
+}
+
+.comboBox:focused{
+    -fx-focused-color: transparent;
 }
 
 .labelFont18{

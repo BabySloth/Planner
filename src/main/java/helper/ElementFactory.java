@@ -1,19 +1,20 @@
 package helper;
 
+import javafx.collections.FXCollections;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Factory
  * Generates Nodes
  */
-public class ElementGenerator {
+public class ElementFactory {
     public static Label label(String text, Color color, double width, double height, String... styles){
         Label label = new Label(text); // Leading space to prevent jumbled text
         label.setTextFill(color);
@@ -33,12 +34,39 @@ public class ElementGenerator {
         return button;
     }
 
-    public static TextField textField(String defaultText, String promptText, Color color, double width, double height, String... styles){
+    /**
+     * Does not accept color since you can't change TextField text color by code (only through css)
+     * @param defaultText
+     * @param promptText
+     * @param width
+     * @param height
+     * @param styles
+     * @return
+     */
+    public static TextField textField(String defaultText, String promptText, double width, double height, String... styles){
         TextField textField = new TextField(defaultText);
         textField.setPromptText(promptText);
         resize(textField, width, height);
         textField.getStyleClass().addAll(styles);
         return textField;
+    }
+
+    public static TextArea textArea(String text, String prompt, double width, double height, String... styles){
+        TextArea textArea = new TextArea(text);
+        textArea.setWrapText(true);
+        textArea.setPromptText(prompt);
+        resize(textArea, width, height);
+        textArea.getStyleClass().addAll(styles);
+        return textArea;
+    }
+
+    public static ComboBox<String> comboBox(double width, double height, List<String> choices, String... styles){
+        ComboBox<String> control = new ComboBox<>(FXCollections.observableArrayList(choices));
+        resize(control, width, height);
+        control.getStyleClass().addAll(styles);
+        control.getSelectionModel().selectFirst();
+
+        return control;
     }
 
     /**
@@ -48,7 +76,7 @@ public class ElementGenerator {
      * @return New button
      */
     public static Button decrementButton(double side, Color color, String... style) {
-        return ElementGenerator.button("<", color, side, side, style);
+        return ElementFactory.button("<", color, side, side, style);
     }
 
     /**
@@ -58,7 +86,7 @@ public class ElementGenerator {
      * @return New button
      */
     public static Button incrementButton(double side, Color color, String... style){
-        return ElementGenerator.button(">", color, side, side, style);
+        return ElementFactory.button(">", color, side, side, style);
     }
 
     public static GridPane gridPane(int rowAmount, int columnAmount, double rowHeight, double columnWidth){
@@ -72,6 +100,19 @@ public class ElementGenerator {
         return pane;
     }
 
+    public static HBox hBox(double width, double height, Node... children){
+        HBox pane = new HBox(children);
+        resize(pane, width, height);
+        return pane;
+    }
+
+    public static VBox vBox(double width, double height, Node... children){
+        VBox pane = new VBox(children);
+        resize(pane, width, height);
+        return pane;
+    }
+
+    // TODO: Refactor this out such that it is only private static void
     public static void resize(Region region, double width, double height){
         if(width != 0) {
             region.setMinWidth(width);

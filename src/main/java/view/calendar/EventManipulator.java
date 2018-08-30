@@ -2,12 +2,10 @@ package view.calendar;
 
 import helper.Blank;
 import helper.Colors;
-import helper.ElementGenerator;
+import helper.ElementFactory;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -17,6 +15,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class EventManipulator extends VBox implements BasicView {
     private final CalendarView controller;
@@ -42,7 +41,7 @@ public class EventManipulator extends VBox implements BasicView {
     public void generateView() {
         getChildren().clear();
         events = new ArrayList<>(data.getEvents(firstSelection, secondSelection));
-        events.sort(new Sort.ChronoOrder());
+        events.sort(new Sort.OrderNumber());
         getChildren().addAll(getTopBasicInformation());
         getChildren().addAll(getEventView());
     }
@@ -58,7 +57,7 @@ public class EventManipulator extends VBox implements BasicView {
         String[] style = {"labelFont18"};
 
         // Label for the entire right side
-        Label headLabel = ElementGenerator.label("Details", Colors.LIGHT_GRAY, width, height, style);
+        Label headLabel = ElementFactory.label("Details", Colors.LIGHT_GRAY, width, height, style);
         headLabel.setAlignment(Pos.CENTER);
 
         // Top most is for the first selection
@@ -66,7 +65,7 @@ public class EventManipulator extends VBox implements BasicView {
 
         String firstText = String.format("First selected: %s", firstSelection.format(dateFormat));
         Color firstColor = now.equals(firstSelection) ? Colors.YELLOW : Colors.LIGHT_GRAY;
-        Label firstLabel = ElementGenerator.label(firstText, firstColor, width, height, style);
+        Label firstLabel = ElementFactory.label(firstText, firstColor, width, height, style);
         firstLabel.setOnMouseClicked(e -> {
             setFirstSelection(LocalDate.now());
             calendarContent.setFirstSelection(LocalDate.now());
@@ -77,10 +76,10 @@ public class EventManipulator extends VBox implements BasicView {
         String secondText = "None selected";
         Color secondColor = Colors.LIGHT_GRAY;
         if(secondSelection != null){
-            secondText = String.format(" Second selected: %s", secondSelection.format(dateFormat));
+            secondText = String.format("Second selected: %s", secondSelection.format(dateFormat));
             secondColor = now.equals(secondSelection) ? Colors.YELLOW : secondColor;
         }
-        Label secondLabel = ElementGenerator.label(secondText, secondColor, width, height, style);
+        Label secondLabel = ElementFactory.label(secondText, secondColor, width, height, style);
         secondLabel.setOnMouseClicked(e -> {
             setSecondSelection(null);
             calendarContent.setSecondSelection(null);
@@ -90,10 +89,10 @@ public class EventManipulator extends VBox implements BasicView {
         int numberEvents = events.size();
         String numberEventsText = numberEvents == 1 ? String.format("There is %d event", numberEvents) :
                 String.format("There are %d events", numberEvents);
-        Label thirdLabel = ElementGenerator.label(numberEventsText, Colors.LIGHT_GRAY, width, height, style);
+        Label thirdLabel = ElementFactory.label(numberEventsText, Colors.LIGHT_GRAY, width, height, style);
 
         // Count down days
-        Label fourthLabel = ElementGenerator.label(countdownText(), Colors.LIGHT_GRAY, width, height, style);
+        Label fourthLabel = ElementFactory.label(countdownText(), Colors.LIGHT_GRAY, width, height, style);
 
         return new Node[]{headLabel, firstLabel, secondLabel, thirdLabel, fourthLabel};
     }
@@ -118,10 +117,14 @@ public class EventManipulator extends VBox implements BasicView {
     private boolean makingNewEvent = false;
 
     private Node[] getEventView(){
+        makingNewEvent = false;
         double height = Measurements.node_height;
+        double total_width = Measurements.total_width;
         String[] styleButton = {"labelFont15", "buttonCalendar"};
+        if(events.size() == 0) makingNewEvent = true;
+        Event selectedEvent = makingNewEvent ? null : events.get(eventPointer);
 
-        Button decrement = ElementGenerator.decrementButton(40, Colors.LIGHT_GRAY, styleButton);
+        Button decrement = ElementFactory.decrementButton(40, Colors.LIGHT_GRAY, styleButton);
         decrement.setOnAction(e -> {
             if(makingNewEvent){
                 makingNewEvent = false;
@@ -131,7 +134,7 @@ public class EventManipulator extends VBox implements BasicView {
             eventPointer = newValue >= 0 ? newValue : 0;
             generateView();
         });
-        Button increment = ElementGenerator.incrementButton(40, Colors.LIGHT_GRAY, styleButton);
+        Button increment = ElementFactory.incrementButton(40, Colors.LIGHT_GRAY, styleButton);
         increment.setOnAction(e -> {
             if(makingNewEvent){
                 makingNewEvent = false;
@@ -141,22 +144,83 @@ public class EventManipulator extends VBox implements BasicView {
             eventPointer = newValue > events.size() - 1 ? eventPointer : newValue;
             generateView();
         });
-        Button newEventButton = ElementGenerator.button("New Event", makingNewEvent ? Colors.PURPLE : Colors.LIGHT_GRAY, 200, height, styleButton);
+        Button newEventButton = ElementFactory.button("New Event", makingNewEvent ? Colors.PURPLE : Colors.LIGHT_GRAY, 200, height, styleButton);
         newEventButton.setOnAction(e ->{
             makingNewEvent = true;
             generateView();
         });
         HBox container1 = new HBox(decrement, increment, newEventButton);
-        ElementGenerator.resize(container1, Measurements.total_width, height);
+        ElementFactory.resize(container1, Measurements.total_width, height);
 
         Blank blank = new Blank(1, 30);
-        Event selectedEvent = makingNewEvent ? null : events.get(eventPointer);
-        Color color = Colors.LIGHT_GRAY;
-        String[] styleText = {"labelFont18", "text-field"};
 
-        TextField title = ElementGenerator.textField(selectedEvent == null ? "" : selectedEvent.getTitle(), "Title", color, 0, height, styleText);
+        String[] styleTextField = {"labelFont18", "text-field"};
+        String[] styleTextLabel = {"labelFont18"};
 
-        return new Node[]{blank, container1, title};
+        double widthF = Measurements.node_input_width;
+        double widthL = Measurements.node_title_width;
+
+        //Title
+        Label titleLabel = ElementFactory.label("Title: ", Colors.LIGHT_GRAY, widthL, height, styleTextLabel);
+        TextField titleField = ElementFactory.textField(selectedEvent == null ? "" : selectedEvent.getTitle(), "Enter", widthF, height, styleTextField);
+        HBox containerTitle = ElementFactory.hBox(total_width, height, titleLabel, titleField);
+
+        Label descLabel = ElementFactory.label("Desc: ", Colors.LIGHT_GRAY, widthL, height, styleTextLabel);
+        TextArea descArea = ElementFactory.textArea(selectedEvent == null ? "" : selectedEvent.getDescription(), "Enter", widthF, height, "textArea", "labelFont15");
+        HBox containerDesc = ElementFactory.hBox(total_width, height, descLabel, descArea);
+
+        Label colorLabel = ElementFactory.label("Col: ", Colors.LIGHT_GRAY, widthL, height, styleTextLabel);
+        ArrayList<String> colorChoices = new ArrayList<>(Arrays.asList("Blue", "Red", "Green"));
+        ComboBox<String> colorChoice = ElementFactory.comboBox(widthF, height, colorChoices, "comboBox");
+        HBox containerColor = ElementFactory.hBox(total_width, height, colorLabel, colorChoice);
+
+        Button save = ElementFactory.button("Save", Colors.LIGHT_GRAY, total_width, height, "buttonCalendar");
+        save.setOnAction(e -> {
+            String title = titleField.getText();
+            if(title.isEmpty()) return;
+
+            String desc = descArea.getText();
+            String color = userColorChoice(colorChoice.getSelectionModel().getSelectedItem()).substring(1); // removes #
+
+            if(selectedEvent == null){
+                Event newEvent = new Event(data.availableId(), title, desc, firstSelection, secondSelection, color);
+                data.addEvent(newEvent);
+                System.out.println(newEvent.getDateStart());
+                System.out.println(newEvent.getDateEnd());
+            }else{
+                selectedEvent.setTitle(title);
+                selectedEvent.setDescription(desc);
+                selectedEvent.setDateStart(firstSelection);
+                selectedEvent.setDateEnd(secondSelection);
+                selectedEvent.setColor(color);
+            }
+            eventPointer = 0;
+            calendarContent.generateView();
+            generateView();
+        });
+        Button delete = ElementFactory.button("Delete", Colors.LIGHT_GRAY, total_width, height, "buttonCalendar");
+        delete.setOnMouseClicked(e -> {
+            if ((e.isShortcutDown() || e.isShiftDown()) && selectedEvent != null){
+                data.removeEvent(selectedEvent);
+                eventPointer = 0;
+                calendarContent.generateView();
+                generateView();
+            }
+        });
+
+        return new Node[]{blank, container1, containerTitle, containerDesc, containerColor, save, delete};
+    }
+
+    private String userColorChoice(String colorString){
+        switch(colorString){
+            case "Blue":
+                return Colors.toHex(Colors.BLUE);
+            case "Red":
+                return Colors.toHex(Colors.LIGHT_RED);
+            case "Green":
+                return Colors.toHex(Colors.LIGHT_GREEN);
+        }
+        return Colors.toHex(Colors.BLUE);
     }
 
     private class Measurements{
@@ -164,6 +228,8 @@ public class EventManipulator extends VBox implements BasicView {
         final static double total_height = 800;
 
         final static double node_height = 40;
+        final static double node_title_width = 55;
+        final static double node_input_width = total_width - node_title_width;
     }
 
     // -------------------
@@ -176,6 +242,7 @@ public class EventManipulator extends VBox implements BasicView {
 
     void setFirstSelection(LocalDate firstSelection) {
         this.firstSelection = firstSelection;
+        eventPointer = 0;
         generateView();
     }
 
@@ -183,6 +250,7 @@ public class EventManipulator extends VBox implements BasicView {
         if(!firstSelection.equals(secondSelection)){
             this.secondSelection = secondSelection;
         }
+        eventPointer = 0;
         generateView();
     }
 }

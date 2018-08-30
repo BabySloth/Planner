@@ -21,19 +21,13 @@ public class Sort {
         }
     }
 
-    public static class ChronoOrder implements Comparator<Event> {
+    public static class OrderNumber implements Comparator<Event> {
+
+
         @Override
         public int compare(Event o1, Event o2){
-            LocalDate d1 = o1.getDateStart();
-            LocalDate d2 = o2.getDateStart();
-
-            if(d1.isAfter(d2)){
-                return 1;
-            }else if(d1.isEqual(d2)){
-                return 0;
-            }else{
-                return -1;
-            }
+            return Integer.compare(o1.getOrder(), o2.getOrder());
         }
     }
+
 }

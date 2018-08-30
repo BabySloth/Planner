@@ -5,13 +5,16 @@ import helper.Colors;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import view.BasicView;
-import helper.ElementGenerator;
+import helper.ElementFactory;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -39,6 +42,13 @@ class CalendarContent extends VBox implements BasicView {
 
         setMainDesign();
         generateView();
+
+        setOnKeyPressed((KeyEvent event) -> {
+            if(event.getCode() == KeyCode.DOWN)
+                changeFirstDate(firstDate.plusWeeks(1));
+            else if(event.getCode() == KeyCode.UP)
+                changeFirstDate(firstDate.minusWeeks(1));
+        });
     }
 
     @Override
@@ -84,34 +94,34 @@ class CalendarContent extends VBox implements BasicView {
 
         int yearNow = now.getYear();
         int yearDecrementNumber = displayDate.getYear() - 1;
-        Button yearDecrement = ElementGenerator.decrementButton(width_part, yearDecrementNumber == yearNow ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
+        Button yearDecrement = ElementFactory.decrementButton(width_part, yearDecrementNumber == yearNow ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
         yearDecrement.setOnAction(e -> changeYear(yearDecrementNumber));
-        Button year = ElementGenerator.button(String.valueOf(displayDate.getYear()), sameYear(displayDate) ? Colors.YELLOW : Colors.LIGHT_GRAY,
-                                              width_whole, height_whole, style);
+        Button year = ElementFactory.button(String.valueOf(displayDate.getYear()), sameYear(displayDate) ? Colors.YELLOW : Colors.LIGHT_GRAY,
+                                            width_whole, height_whole, style);
         year.setOnAction(e -> {
             showing = Type.YEAR;
             generateView();
         });
         int yearIncrementNumber = displayDate.getYear() + 1;
-        Button yearIncrement = ElementGenerator.incrementButton(width_part, yearIncrementNumber == now.getYear() ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
+        Button yearIncrement = ElementFactory.incrementButton(width_part, yearIncrementNumber == now.getYear() ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
         yearIncrement.setOnAction(e -> changeYear(yearIncrementNumber));
 
         LocalDate previousMonth = displayDate.minusMonths(1);
-        Button monthDecrement = ElementGenerator.decrementButton(width_part, sameYearMonth(previousMonth) ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
+        Button monthDecrement = ElementFactory.decrementButton(width_part, sameYearMonth(previousMonth) ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
         monthDecrement.setOnAction(e -> changeFirstDate(previousMonth));
-        Button month = ElementGenerator.button(capitalize(displayDate.getMonth().toString()), sameYearMonth(displayDate) ? Colors.YELLOW : Colors.LIGHT_GRAY,
-                                               width_whole, height_whole, style);
+        Button month = ElementFactory.button(capitalize(displayDate.getMonth().toString()), sameYearMonth(displayDate) ? Colors.YELLOW : Colors.LIGHT_GRAY,
+                                             width_whole, height_whole, style);
         month.setOnAction(e -> {
             showing = Type.MONTH;
             generateView();
         });
         LocalDate nextMonth = displayDate.plusMonths(1);
-        Button monthIncrement = ElementGenerator.incrementButton(width_part, sameYearMonth(nextMonth) ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
+        Button monthIncrement = ElementFactory.incrementButton(width_part, sameYearMonth(nextMonth) ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
         monthIncrement.setOnAction(e -> changeFirstDate(nextMonth));
         Rectangle empty = new Blank(Measurements.manipulatorBlank, 1);
 
         // Change to today
-        Button today = ElementGenerator.button("Today", Colors.YELLOW, width_whole, height_whole, style);
+        Button today = ElementFactory.button("Today", Colors.YELLOW, width_whole, height_whole, style);
         today.setOnMouseClicked(e ->{
             if(e.isShortcutDown())
                 changeFirstDate(LocalDate.of(now.getYear(), now.getMonth(), 1));
@@ -123,15 +133,15 @@ class CalendarContent extends VBox implements BasicView {
         // Use firstDate because you change week depending on the first day of the month. displayingDate is always
         // one week after firstDate.
         LocalDate previousWeekDate = firstDate.minusWeeks(1);
-        Button previousWeek = ElementGenerator.decrementButton(width_part, sameWeekOfYear(previousWeekDate) ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
+        Button previousWeek = ElementFactory.decrementButton(width_part, sameWeekOfYear(previousWeekDate) ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
         previousWeek.setOnAction(e -> changeFirstDate(previousWeekDate));
         LocalDate nextWeekDate = firstDate.plusWeeks(1);
-        Button nextWeek = ElementGenerator.decrementButton(width_part, sameWeekOfYear(nextWeekDate) ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
+        Button nextWeek = ElementFactory.incrementButton(width_part, sameWeekOfYear(nextWeekDate) ? Colors.YELLOW : Colors.LIGHT_GRAY, style);
         nextWeek.setOnAction(e -> changeFirstDate(nextWeekDate));
 
         HBox mainContainer = new HBox(yearDecrement, year, yearIncrement, monthDecrement, month, monthIncrement, today,
                                       empty, previousWeek, nextWeek);
-        ElementGenerator.resize(mainContainer, Measurements.width, height_whole);
+        ElementFactory.resize(mainContainer, Measurements.width, height_whole);
         return mainContainer;
     }
 
@@ -142,7 +152,7 @@ class CalendarContent extends VBox implements BasicView {
     private GridPane generateMonthChanger(){
         double columnWidth = Measurements.width / 4;
         double rowHeight = Measurements.height / 3;
-        GridPane container = ElementGenerator.gridPane(3, 4, rowHeight, columnWidth);
+        GridPane container = ElementFactory.gridPane(3, 4, rowHeight, columnWidth);
 
         int counter = 1;
         for(int row = 0; row < 3; row++){
@@ -151,7 +161,7 @@ class CalendarContent extends VBox implements BasicView {
                 boolean isCurrentMonth = monthNumber == LocalDate.now().getMonthValue();
                 String text = capitalize(Month.of(monthNumber).toString());
                 Color color = isCurrentMonth ? Colors.YELLOW : Colors.LIGHT_GRAY;
-                Button button = ElementGenerator.button(text, color, columnWidth, rowHeight, "buttonCalendar", "labelFont30");
+                Button button = ElementFactory.button(text, color, columnWidth, rowHeight, "buttonCalendar", "labelFont30");
                 button.setOnAction(e -> changeMonth(monthNumber));
                 container.add(button, column, row);
                 counter++;
@@ -185,13 +195,13 @@ class CalendarContent extends VBox implements BasicView {
 
         // Quick change month
         HBox yearContainer = new HBox();
-        ElementGenerator.resize(yearContainer, Measurements.width, Measurements.cellHeight);
+        ElementFactory.resize(yearContainer, Measurements.width, Measurements.cellHeight);
         for(int additionalYear = 0; additionalYear < 7; additionalYear++){
             int year = firstYearChoice + additionalYear;
             String text = " " + String.valueOf(year);
             Color color = year == now.getYear() ? Colors.YELLOW : Colors.LIGHT_GRAY;
 
-            Button button = ElementGenerator.button(text, color, Measurements.cellWidth, Measurements.cellHeight, "buttonCalendar", "labelFont30");
+            Button button = ElementFactory.button(text, color, Measurements.cellWidth, Measurements.cellHeight, "buttonCalendar", "labelFont30");
             button.setOnAction(e -> changeYear(year));
 
             yearContainer.getChildren().add(button);
@@ -229,15 +239,15 @@ class CalendarContent extends VBox implements BasicView {
      */
     private HBox generateDaysOfWeekDisplay(){
         HBox container = new HBox();
-        ElementGenerator.resize(container, Measurements.width, Measurements.daysOfWeekHeight);
+        ElementFactory.resize(container, Measurements.width, Measurements.daysOfWeekHeight);
 
         double width = Measurements.daysOfWeekWidth;
         double height = Measurements.daysOfWeekHeight;
         final String[] daysOfWeekNames = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
         for(String name : daysOfWeekNames){
             // Leading space to prevent jumbled text
-            Label label = ElementGenerator.label(" " + name, sameYearMonthDayWeek(name) ? Colors.YELLOW : Colors.LIGHT_GRAY,
-                                        width, height, "labelFont15");
+            Label label = ElementFactory.label(" " + name, sameYearMonthDayWeek(name) ? Colors.YELLOW : Colors.LIGHT_GRAY,
+                                               width, height, "labelFont15");
             container.getChildren().add(label);
         }
 
@@ -252,7 +262,7 @@ class CalendarContent extends VBox implements BasicView {
         double width = Measurements.width;
         double height = Measurements.height;
         VBox container = new VBox();
-        ElementGenerator.resize(container, width, height);
+        ElementFactory.resize(container, width, height);
 
         for(int i = 0; i < 6; i++){  // 6 rows
             LocalDate startingDate = firstDate.plusWeeks(i);
@@ -273,7 +283,7 @@ class CalendarContent extends VBox implements BasicView {
     private HBox generateDayOfMonthDisplay(LocalDate startingDate){
         LocalDate date = startingDate;
         HBox container = new HBox();
-        ElementGenerator.resize(container, Measurements.width, Measurements.eventHeight);
+        ElementFactory.resize(container, Measurements.width, Measurements.eventHeight);
 
         for(int i = 0; i < 7; i++){
             int dayOfMonth = date.getDayOfMonth();
@@ -284,7 +294,7 @@ class CalendarContent extends VBox implements BasicView {
             // If date matches today's date it is yellow. If it matches one of the selected days, then purple. Else gray
             Color color = date.equals(LocalDate.now()) ? Colors.YELLOW : date.equals(firstSelection) || date.equals(secondSelection) ? Colors.PURPLE : Colors.LIGHT_GRAY;
             container.getChildren().add(
-                    ElementGenerator.label(dateString, color, Measurements.eventWidth, Measurements.eventHeight, "labelFont15"));
+                    ElementFactory.label(dateString, color, Measurements.eventWidth, Measurements.eventHeight, "labelFont15"));
 
             date = date.plusDays(1);
         }
@@ -298,7 +308,7 @@ class CalendarContent extends VBox implements BasicView {
      */
     private ScrollPane generateDateEventDisplay() {
         HBox mainContainer = new HBox();
-        ElementGenerator.resize(mainContainer, Measurements.width, Measurements.eventTotalHeight);
+        ElementFactory.resize(mainContainer, Measurements.width, Measurements.eventTotalHeight);
 
         for(int i = 0; i < 7; i++){
             int position = calendarBoxes.size();
@@ -514,7 +524,9 @@ class CalendarContent extends VBox implements BasicView {
     }
 
     void setSecondSelection(LocalDate secondSelection) {
-        if(!firstSelection.equals(secondSelection)){
+        if(firstSelection.equals(secondSelection)){
+            secondSelection = firstSelection;
+        }else{
             this.secondSelection = secondSelection;
         }
         eventManipulator.setSecondSelection(secondSelection);

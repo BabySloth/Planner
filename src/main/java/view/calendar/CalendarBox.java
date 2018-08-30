@@ -34,11 +34,7 @@ public class CalendarBox extends VBox {
 
     private void clickedOn(MouseEvent e){
         if(e.isShortcutDown() || e.isShiftDown()) {
-            if(date.equals(parent.getSecondSelection())){
-                parent.setSecondSelection(null);
-            }else{
-                parent.setSecondSelection(date);
-            }
+            parent.setSecondSelection(date);
         } else {
             parent.setFirstSelection(date);
         }
@@ -55,11 +51,14 @@ public class CalendarBox extends VBox {
                 if(node instanceof Blank){
                     children.remove(node);
                     children.add(i, display);
+                    event.setOrder(i);
                     continue mainLoop;
                 }
             }
 
             children.add(display);
+            event.setOrder(longOrder);
+            longOrder++;
         }
     }
 

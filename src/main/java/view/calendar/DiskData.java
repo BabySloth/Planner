@@ -6,14 +6,18 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 
 public class DiskData {
+    final File fileLocation = new File("/Users/BabySloth/Desktop/exampleCalendar.xml");
     private Document document;
 
     public DiskData(){
-        final File fileLocation = new File("/Users/BabySloth/Desktop/exampleCalendar.xml");
-
         try{
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -43,8 +47,43 @@ public class DiskData {
         }
     }
 
-    public void calendarWrite(){
+    public void calendarWrite(AllEvents data){
+        try{
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
 
+            // Root elements
+            Document document = builder.newDocument();
+            Element rootElement = document.createElement("calendarEvents");
+            document.appendChild(rootElement);
+
+            Event[] events = data.getAllEvents();
+            for(Event event : events){
+                // Child
+                Element child = document.createElement("event");
+                child.setAttribute("id", event.getId());
+                rootElement.appendChild(child);
+
+                // Subchild
+                String[] dataPoints = event.getData();
+                String[] dataNames = {"title", "description", "date", "time", "color"};
+                for (int i = 0; i < 5; i++) {
+                    Element subChild = document.createElement(dataNames[i]);
+                    subChild.appendChild(document.createTextNode(dataPoints[i]));
+                    child.appendChild(subChild);
+                }
+            }
+
+            document.getDocumentElement().normalize();
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            DOMSource source = new DOMSource(document);
+            StreamResult result = new StreamResult(fileLocation);
+            transformer.transform(source, result);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

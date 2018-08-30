@@ -14,7 +14,7 @@ public class Event {
     private String description;  //Extra information when clicked on
     private LocalDate dateStart;
     private LocalDate dateEnd = null;
-    private LocalTime timeStart;  //Time uses 24h clock
+    private LocalTime timeStart = null;  //Time uses 24h clock
     private LocalTime timeEnd = null;
     private String color;  // Hexadecimal
     private int order = -1;
@@ -25,6 +25,15 @@ public class Event {
         this.description = description;
         processDate(date);
         processTime(time);
+        this.color = color;
+    }
+
+    public Event(String id, String title, String description, LocalDate dateStart, LocalDate dateEnd, String color) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.dateStart = dateStart;
+        this.dateEnd = dateEnd == null ? dateStart : dateEnd;
         this.color = color;
     }
 
@@ -60,23 +69,6 @@ public class Event {
 
     public int getDaysLength() {
         return (int) dateStart.until(dateEnd, ChronoUnit.DAYS) + 1;  // Add 1 because there are no 0 day events
-    }
-
-    /**
-     * Gets amount of days until Saturday
-     * @return
-     */
-    public int spanDays(){
-        int length = getDaysLength();
-        int counter = 0;
-        LocalDate tempDate = dateStart;
-        do{
-            tempDate = tempDate.plusDays(1);
-            counter++;
-            length--;
-        }while(tempDate.getDayOfWeek() != DayOfWeek.SATURDAY && length != 0);
-
-        return counter;
     }
 
     int getHourLength() {
@@ -127,8 +119,8 @@ public class Event {
     public LocalDate getDateEnd() {
         return dateEnd;
     }
-    public void setDateEnd(LocalDate dateEnd) {
-        this.dateEnd = dateEnd;
+    public void setDateEnd(LocalDate newDate) {
+        dateEnd = newDate == null ? dateStart : newDate;
     }
 
     public LocalTime getTimeStart() {

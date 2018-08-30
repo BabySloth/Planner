@@ -20,7 +20,7 @@ public class MainHolder extends Pane implements BasicView {
     private DiskData diskData = new DiskData();
 
     //Data
-    AllEvents calendarData = new AllEvents();
+    private AllEvents calendarData = new AllEvents();
 
     /**
      * Singleton
@@ -53,7 +53,7 @@ public class MainHolder extends Pane implements BasicView {
     }
 
     public void writeData(){
-
+        diskData.calendarWrite(calendarData);
     }
 
     @Override

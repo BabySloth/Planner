@@ -39,10 +39,7 @@ public class AllEvents {
      */
     public ArrayList<Event> getEvents(LocalDate date){
         ArrayList<Event> occurrence = new ArrayList<>();
-        events.stream().filter(o1 -> o1.occurs(date)).forEach(o1 -> {
-            occurrence.add(o1);
-            o1.setOrder(-1); // defaults the value
-        });
+        events.stream().filter(o1 -> o1.occurs(date)).forEach(occurrence::add);
         return occurrence;
     }
 
@@ -76,7 +73,10 @@ public class AllEvents {
      */
     public ArrayList<Event> getSingleEvents(LocalDate date){
         ArrayList<Event> occurrence = new ArrayList<>();
-        getEvents(date).stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() == 1).forEach(occurrence::add);
+        getEvents(date).stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() == 1).forEach(o1 -> {
+            occurrence.add(o1);
+            o1.setOrder(-1);
+        });
         return occurrence;
     }
 
@@ -87,7 +87,10 @@ public class AllEvents {
      */
     public ArrayList<Event> getMultiEvents(LocalDate date){
         ArrayList<Event> occurrence = new ArrayList<>();
-        getEvents(date).stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() > 1).forEach(occurrence::add);
+        getEvents(date).stream().filter(o1 -> o1.occurs(date) && o1.getDaysLength() > 1).forEach(o1 -> {
+            occurrence.add(o1);
+            o1.setOrder(-1);
+        });
         occurrence.sort(new Sort.LongestFirst());
         return occurrence;
     }
