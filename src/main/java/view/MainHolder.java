@@ -58,9 +58,8 @@ public class MainHolder extends Pane implements BasicView {
 
     @Override
     public void generateView() {
-        // First view is always the dashboard
-        currentView = VIEWS.DASHBOARD;
-        getChildren().addAll(dashBoard, new SideBoard(VIEWS.DASHBOARD));
+        // First view is always the dashboard but since we only have one finished, make it calendar
+        changeView(VIEWS.CALENDAR);
     }
 
     @Override

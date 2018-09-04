@@ -4,6 +4,7 @@ import helper.Blank;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
@@ -33,11 +34,12 @@ public class CalendarBox extends VBox {
     }
 
     private void clickedOn(MouseEvent e){
-        if(e.isShortcutDown() || e.isShiftDown()) {
+        if(e.isShortcutDown() || e.isShiftDown() || e.getButton() == MouseButton.SECONDARY) {
             parent.setSecondSelection(date);
-        } else {
+        } else if (e.getButton() == MouseButton.PRIMARY){
             parent.setFirstSelection(date);
         }
+        parent.getEventManipulator().generateView();
     }
 
     public void addShortEvent(ArrayList<Event> events){

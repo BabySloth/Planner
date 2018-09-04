@@ -7,7 +7,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -515,7 +514,6 @@ class CalendarContent extends VBox implements BasicView {
 
     void setFirstSelection(LocalDate firstSelection) {
         this.firstSelection = firstSelection;
-        eventManipulator.setFirstSelection(firstSelection);
         generateView();
     }
 
@@ -524,12 +522,13 @@ class CalendarContent extends VBox implements BasicView {
     }
 
     void setSecondSelection(LocalDate secondSelection) {
-        if(firstSelection.equals(secondSelection)){
-            secondSelection = firstSelection;
-        }else{
-            this.secondSelection = secondSelection;
+        if(secondSelection != null){
+            if(secondSelection.equals(this.secondSelection) || secondSelection.equals(firstSelection)){
+                this.secondSelection = null;
+            }else{
+                this.secondSelection = secondSelection;
+            }
         }
-        eventManipulator.setSecondSelection(secondSelection);
         generateView();
     }
 

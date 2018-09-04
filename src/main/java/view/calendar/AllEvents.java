@@ -14,6 +14,7 @@ public class AllEvents {
      */
     public void addEvent(Event event){
         int index = events.size() - 1;
+        if(events.contains(event)) return;
         if(index == -1) {
             events.add(event);
             return;

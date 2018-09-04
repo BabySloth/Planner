@@ -18,6 +18,9 @@ public class DiskData {
     private Document document;
 
     public DiskData(){
+        String userName = System.getProperty("user.name");
+        
+
         try{
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
