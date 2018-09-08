@@ -14,12 +14,15 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 
 public class DiskData {
-    final File fileLocation = new File("/Users/BabySloth/Desktop/exampleCalendar.xml");
+    private File fileLocation;
     private Document document;
 
     public DiskData(){
-        String userName = System.getProperty("user.name");
-        
+        String home = System.getProperty("user.home");
+        fileLocation = new File(home + "/Desktop/exampleCalendar.xml");
+        if(!fileLocation.exists()) {
+            createXMLFIle("calendarEvents");
+        }
 
         try{
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -87,6 +90,14 @@ public class DiskData {
         }catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Creates the xml file if it doesn't exists
+     * @param parentNodeName
+     */
+    private void createXMLFIle(String parentNodeName){
+        
     }
 
 }
