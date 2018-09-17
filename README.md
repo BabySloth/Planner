@@ -1,6 +1,6 @@
 # Planner
 Improvements to Slool - never completed.
-Requires java jdk 1.8 (Will change to java 11 in around December or this projected will be converted to Electron)
+Requires java jdk 1.8 (Will change to java 11 in around December)
 
 # To Run  
 1. Clone repository
