@@ -15,27 +15,35 @@ import java.io.File;
 
 public class DiskData {
     private File fileLocation;
-    private Document document;
 
     public DiskData(){
         String home = System.getProperty("user.home");
-        fileLocation = new File(home + "/Desktop/exampleCalendar.xml");
+        fileLocation = new File(home + "/Desktop/calendarData.xml");
         if(!fileLocation.exists()) {
             createXMLFIle("calendarEvents");
         }
+    }
 
+    /**
+     * Creates a new document if the xml file doesn't exist or returns a document of the existing xml file.
+     * @param fileExists  If the user ran the program for the first time / deleted needed files, return a blank document
+     * @return New document if file doesn't exit
+     */
+    private Document createDocument(boolean fileExists){
+        Document document = null;
         try{
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            document = builder.parse(fileLocation);
-        }catch(Exception err){
-            System.out.println("Error reading data in view.calendar.DiskData");
-            err.printStackTrace();
+            document = fileExists ? builder.parse(fileLocation) : builder.newDocument();
+        }catch(Exception e){
+            e.printStackTrace();
+        }finally {
+            return document;
         }
-
     }
 
     public void calendarRead(AllEvents data){
+        Document document = createDocument(true);
         NodeList nodes = document.getElementsByTagName("event");
 
         for(int index = 0; index < nodes.getLength(); index++) {
@@ -55,11 +63,8 @@ public class DiskData {
 
     public void calendarWrite(AllEvents data){
         try{
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-
+            Document document = createDocument(true);
             // Root elements
-            Document document = builder.newDocument();
             Element rootElement = document.createElement("calendarEvents");
             document.appendChild(rootElement);
 
@@ -94,10 +99,23 @@ public class DiskData {
 
     /**
      * Creates the xml file if it doesn't exists
-     * @param parentNodeName
+     * @param parentNodeName name of the root node
      */
     private void createXMLFIle(String parentNodeName){
-        
+        try{
+            Document document = createDocument(false);
+            Element root = document.createElement(parentNodeName);
+            document.appendChild(root);
+
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource domSource = new DOMSource(document);
+            StreamResult streamResult = new StreamResult(fileLocation);
+            transformer.transform(domSource, streamResult);
+        }catch(Exception e){
+            System.out.println("doesn't work");
+            e.printStackTrace();
+        }
     }
 
 }
