@@ -1,6 +1,7 @@
 # Planner
 Improvements to Slool - never completed.
 Requires java jdk 1.8 (Will change to java 11 in around December)
+^^A lie - This will be recreated using Electron and React (Javascript, and maybe typescript in the future)
 
 # To Run  
 1. Clone repository
