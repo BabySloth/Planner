@@ -1,7 +1,5 @@
 # Planner
-Improvements to Slool - never completed.
-Requires java jdk 1.8 (Will change to java 11 in around December)
-^^A lie - This will be recreated using Electron and React (Javascript, and maybe typescript in the future)
+A calendar application to allow the user to keep track of events. Will save data to disk. This project is operational, but is being replaced with another project (Arch) to learn Javascript, HTML, CSS, React, and nodeJS. 
 
 # To Run  
 1. Clone repository
